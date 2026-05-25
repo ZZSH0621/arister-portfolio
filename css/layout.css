@@ -1,0 +1,15 @@
+.page{max-width:100%;overflow-x:hidden}
+
+section{padding:var(--space-section) var(--space-xl);position:relative}
+section:nth-child(even){background:var(--color-surface)}
+
+.section-inner{max-width:var(--max-width);margin:0 auto;width:100%}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl);align-items:start}
+
+.content-col{max-width:65ch}
+
+@media(max-width:768px){
+  section{padding:var(--space-xl) var(--space-lg)}
+  .grid-2{grid-template-columns:1fr;gap:var(--space-lg)}
+}

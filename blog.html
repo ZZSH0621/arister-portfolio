@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="assets/images/general/favicon.svg">
+<title>Blog — Your Name</title>
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/blog.css">
+<link rel="stylesheet" href="css/cursor.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="data/site-config.js"></script>
+<script src="data/translations.js"></script>
+<script src="data/blog-posts.js"></script>
+</head>
+<body>
+
+<div class="custom-cursor" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__logo" data-i18n="hero.name">Your Name</a>
+    <nav class="nav__links" id="navLinks">
+      <a href="index.html" class="nav__link" data-i18n="nav.home">Home</a>
+      <a href="index.html#about" class="nav__link" data-i18n="nav.about">About</a>
+      <a href="index.html#portfolio" class="nav__link" data-i18n="nav.portfolio">Portfolio</a>
+      <a href="blog.html" class="nav__link active" data-i18n="nav.blog">Blog</a>
+      <a href="index.html#contact" class="nav__link" data-i18n="nav.contact">Contact</a>
+    </nav>
+    <div class="nav__actions">
+      <button class="nav__lang" data-lang-toggle data-i18n="lang.switch">EN</button>
+      <button class="nav__burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="blog-post" id="blogPost">
+  <a href="blog.html" class="blog-post__back" data-i18n="blog.back" id="blogBack">← Back to list</a>
+  <div class="blog-post__meta" id="blogMeta"></div>
+  <h1 class="blog-post__title" id="blogTitle"></h1>
+  <div class="blog-post__body" id="blogBody"></div>
+  <nav class="blog-post__nav" id="blogPostNav"></nav>
+</main>
+
+<div class="blog-listing" id="blogListing">
+  <section style="padding-top:calc(var(--nav-height) + var(--space-xl))">
+    <div class="section-inner">
+      <div class="blog__header">
+        <div>
+          <p class="section-label" data-i18n="blog.label">Blog</p>
+          <h2 class="section-heading" data-i18n="blog.heading" data-reveal>Thoughts<span> & </span>insights</h2>
+        </div>
+      </div>
+      <div class="blog__grid" id="blogGrid"></div>
+    </div>
+  </section>
+</div>
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/i18n.js"></script>
+<script src="js/core/theme.js"></script>
+<script src="js/components/navigation.js"></script>
+<script src="js/components/cursor.js"></script>
+<script src="js/components/blog.js"></script>
+<script src="js/components/animations.js"></script>
+<script>
+(function(){
+  'use strict';
+  function init(){
+    var C=window.__CONFIG||{defaultLanguage:'zh-CN'};
+    if(window.App.I18n)window.App.I18n.init(C);
+    if(window.App.Theme)window.App.Theme.init(C);
+    if(window.App.Navigation)window.App.Navigation.init();
+    if(window.App.Cursor)window.App.Cursor.init();
+    if(window.App.Animations)window.App.Animations.init();
+    if(window.App.Blog)window.App.Blog.init();
+    document.documentElement.classList.add('app-ready');
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init)}
+  else{init()}
+})();
+</script>
+</body>
+</html>

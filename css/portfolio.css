@@ -1,0 +1,127 @@
+/* ============================================
+   Portfolio — Compressed-strip stack + wave drag + click-to-expand
+   Source-inspired from aristidebenoist.com
+   Each project = narrow vertical strip (image compressed from sides)
+   Drag = wave/ripple physics across all strips
+   ============================================ */
+
+/* Section header */
+.portfolio__header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:var(--space-lg)}
+.portfolio__counter{font-family:var(--font-mono);font-size:var(--text-2xl);font-weight:200;white-space:nowrap}
+.portfolio__current{color:var(--color-accent)}
+.portfolio__separator,.portfolio__total{color:var(--color-text-muted)}
+
+/* ── STRIP STACK VIEW ─────────────────────── */
+.portfolio__stage{position:relative;width:100%;height:clamp(420px,60vh,700px);overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;perspective:650px}
+.portfolio__stage:active{cursor:grabbing}
+
+/* Track: contains all absolutely-positioned strips */
+.portfolio__track{position:absolute;top:0;left:0;height:100%;pointer-events:none;transform-style:preserve-3d}
+.portfolio__track>*{pointer-events:auto}
+
+/* Each compressed strip */
+.portfolio__strip{position:absolute;top:0;height:100%;cursor:pointer;transition:filter 0.4s ease;will-change:transform}
+.portfolio__strip-inner{position:relative;width:100%;height:100%;overflow:hidden}
+.portfolio__strip-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:grayscale(0.3);transition:filter 0.5s ease,transform 0.5s ease}
+.portfolio__strip:hover .portfolio__strip-img,
+.portfolio__strip.is-hovered .portfolio__strip-img{filter:grayscale(0);transform:scale(1.03)}
+
+/* Strip number overlay */
+.portfolio__strip-number{position:absolute;bottom:var(--space-md);left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:var(--text-sm);color:#fff;background:rgba(0,0,0,0.6);padding:2px 10px;border-radius:3px;pointer-events:none;z-index:2;opacity:0;transition:opacity 0.3s ease;white-space:nowrap}
+.portfolio__strip:hover .portfolio__strip-number,
+.portfolio__strip.is-hovered .portfolio__strip-number{opacity:1}
+
+/* Active strip (closest to center) */
+.portfolio__strip.is-active .portfolio__strip-img{filter:grayscale(0)}
+
+/* ── FOCUS STATE (clicked strip expands, neighbors greyed) ── */
+.portfolio__strip.is-focused{width:clamp(460px,75vw,960px) !important;z-index:10 !important;transition:width 0.45s cubic-bezier(0.16,1,0.3,1),transform 0.45s cubic-bezier(0.16,1,0.3,1)}
+.portfolio__strip.is-focused .portfolio__strip-img{filter:grayscale(0)}
+.portfolio__strip.is-focused .portfolio__strip-number{opacity:0}
+
+/* Left neighbor: show right half, greyed, shifted left */
+.portfolio__strip.is-neighbor--left{z-index:5;transition:opacity 0.4s ease,filter 0.4s ease}
+.portfolio__strip.is-neighbor--left .portfolio__strip-img{filter:grayscale(1) brightness(0.45);transform:scale(1)}
+.portfolio__strip.is-neighbor--left .portfolio__strip-number{opacity:0}
+.portfolio__strip.is-neighbor--left:hover .portfolio__strip-img{filter:grayscale(1) brightness(0.45)}
+
+/* Right neighbor: show left half, greyed, shifted right */
+.portfolio__strip.is-neighbor--right{z-index:5;transition:opacity 0.4s ease,filter 0.4s ease}
+.portfolio__strip.is-neighbor--right .portfolio__strip-img{filter:grayscale(1) brightness(0.45);transform:scale(1)}
+.portfolio__strip.is-neighbor--right .portfolio__strip-number{opacity:0}
+.portfolio__strip.is-neighbor--right:hover .portfolio__strip-img{filter:grayscale(1) brightness(0.45)}
+
+/* Other strips fade out */
+.portfolio__strip.is-hidden{opacity:0;pointer-events:none;transition:opacity 0.35s ease}
+
+/* Focus overlay: text breaks out of image, spans full stage */
+.portfolio__focus-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:20;pointer-events:auto;animation:focusOverlayIn 0.5s 0.15s cubic-bezier(0.16,1,0.3,1) both;padding:var(--space-lg);background:radial-gradient(ellipse at center,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.15) 50%,rgba(0,0,0,0.35) 100%)}
+@keyframes focusOverlayIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+.portfolio__focus-word{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;margin:0;position:relative;z-index:2}
+.portfolio__focus-char{display:inline-block;font-family:var(--font-display);font-size:clamp(5rem,13vw,12rem);font-weight:900;line-height:1;text-transform:uppercase;text-shadow:3px 3px 0 rgba(0,0,0,0.9),-2px -2px 0 rgba(0,0,0,0.7),2px -2px 0 rgba(0,0,0,0.7),-2px 2px 0 rgba(0,0,0,0.7),0 0 30px rgba(0,0,0,0.6),0 0 80px rgba(0,0,0,0.3)}
+.portfolio__focus-zh{font-size:var(--text-lg);font-weight:300;color:rgba(255,255,255,0.9);margin-top:var(--space-lg);letter-spacing:0.12em;text-shadow:0 2px 8px rgba(0,0,0,0.8)}
+.portfolio__focus-cta{display:inline-block;margin-top:var(--space-xl);padding:10px 28px;border:1px solid rgba(255,255,255,0.3);border-radius:24px;color:#fff;font-size:var(--text-sm);cursor:pointer;transition:all 0.3s ease;background:rgba(255,255,255,0.04);backdrop-filter:blur(4px)}
+.portfolio__focus-cta:hover{background:var(--color-accent);border-color:var(--color-accent);transform:translateY(-2px)}
+
+/* ── ARROW BUTTONS ────────────────────────── */
+.portfolio__arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:48px;height:48px;border-radius:50%;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.35s ease,transform 0.35s ease,background 0.25s ease;pointer-events:none}
+.portfolio__stage:hover .portfolio__arrow{opacity:1;pointer-events:auto}
+.portfolio__arrow:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent);transform:translateY(-50%) scale(1.08)}
+.portfolio__arrow:active{transform:translateY(-50%) scale(0.95)}
+.portfolio__arrow svg{width:20px;height:20px}
+.portfolio__arrow--left{left:var(--space-md)}
+.portfolio__arrow--right{right:var(--space-md)}
+.portfolio__arrow--left:hover{transform:translateY(-50%) translateX(-2px) scale(1.08)}
+.portfolio__arrow--right:hover{transform:translateY(-50%) translateX(2px) scale(1.08)}
+
+/* ── SIDEBAR DOTS ─────────────────────────── */
+.portfolio__sidebar{position:absolute;top:50%;right:var(--space-lg);transform:translateY(-50%);display:flex;flex-direction:column;gap:var(--space-sm);z-index:5}
+.portfolio__dot{width:8px;height:8px;border-radius:50%;background:var(--color-text-muted);cursor:pointer;transition:all 0.3s ease;border:1px solid transparent}
+.portfolio__dot:hover,.portfolio__dot.is-active{background:var(--color-accent);transform:scale(1.4)}
+
+/* Back button (detail view) */
+.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1/-1;width:fit-content}
+.portfolio__back svg{width:16px;height:16px}
+.portfolio__back:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+.portfolio__content.active .portfolio__back{display:inline-flex}
+
+/* ── CONTENT VIEW ─────────────────────────── */
+.portfolio__content{display:none;position:relative;width:100%;min-height:clamp(420px,60vh,650px)}
+.portfolio__content.active{display:grid;grid-template-columns:380px 1fr;gap:var(--space-lg) var(--space-2xl);align-items:start;animation:contentIn 0.45s cubic-bezier(0.16,1,0.3,1)}
+@keyframes contentIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+
+/* Detail panel */
+.portfolio__detail-title{font-size:var(--text-2xl);font-weight:600;margin-bottom:var(--space-md);line-height:1.1}
+.portfolio__detail-meta{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg);text-transform:uppercase;letter-spacing:0.08em}
+.portfolio__detail-desc{font-size:var(--text-base);color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-lg)}
+.portfolio__detail-tags{display:flex;flex-wrap:wrap;gap:var(--space-sm);margin-bottom:var(--space-xl)}
+.portfolio__detail-tag{padding:5px 14px;border:1px solid var(--color-border);border-radius:20px;font-size:var(--text-xs);color:var(--color-text-secondary)}
+.portfolio__detail-links{display:flex;gap:var(--space-md);flex-wrap:wrap}
+
+/* Gallery */
+.portfolio__gallery-wrap{overflow:hidden}
+.portfolio__gallery{display:flex;gap:var(--space-lg);overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:var(--space-lg);scrollbar-width:none;-ms-overflow-style:none;cursor:grab}
+.portfolio__gallery::-webkit-scrollbar{display:none}
+.portfolio__gallery-item{flex-shrink:0;width:clamp(280px,35vw,480px);scroll-snap-align:start}
+.portfolio__gallery-item img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:4px;filter:grayscale(0.2);transition:filter 0.3s ease}
+.portfolio__gallery-item:hover img{filter:grayscale(0)}
+.portfolio__gallery-item-label{display:block;font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-sm)}
+
+/* Instructions hint */
+.portfolio__hint{text-align:center;margin-top:var(--space-md);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);transition:opacity 0.3s ease}
+.portfolio__hint span{color:var(--color-text-secondary)}
+
+/* ── Responsive ───────────────────────────── */
+@media(max-width:1024px){
+  .portfolio__content.active{grid-template-columns:1fr;gap:var(--space-xl)}
+  .portfolio__sidebar{display:none}
+  .portfolio__arrow{width:40px;height:40px}
+  .portfolio__arrow svg{width:16px;height:16px}
+}
+@media(max-width:768px){
+  .portfolio__arrow{display:none}
+  .portfolio__stage{height:clamp(300px,45vh,450px)}
+  .portfolio__header{flex-direction:column;align-items:center;gap:var(--space-md)}
+  .portfolio__strip:not(.is-focused){width:80px !important}
+  .portfolio__strip-number{font-size:var(--text-xs);padding:1px 6px}
+}

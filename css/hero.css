@@ -1,0 +1,30 @@
+/* Hero */
+#hero{height:100dvh;display:flex;align-items:center;padding-top:var(--nav-height);position:relative;overflow:hidden}
+.hero__inner{width:100%;max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl);align-items:center;padding:0 var(--space-xl)}
+.hero__content{position:relative;z-index:2}
+.hero__greeting{font-family:var(--font-mono);font-size:var(--text-sm);color:var(--color-accent);text-transform:uppercase;letter-spacing:0.2em;margin-bottom:var(--space-md)}
+.hero__name{font-size:var(--text-4xl);line-height:0.85;margin-bottom:var(--space-lg);overflow:hidden}
+.hero__name-line{display:block;animation:heroReveal 1.2s var(--ease-out-expo) forwards}
+@keyframes heroReveal{from{transform:translateY(110%);opacity:0}to{transform:translateY(0);opacity:1}}
+.hero__role{font-size:var(--text-xl);color:var(--color-text-secondary);margin-bottom:var(--space-md);font-weight:300}
+.hero__tagline{font-size:var(--text-base);color:var(--color-text-muted);max-width:40ch;margin-bottom:var(--space-xl);line-height:1.7}
+.hero__cta{display:flex;gap:var(--space-md);flex-wrap:wrap}
+.hero__visual{position:relative;width:100%;height:100%;min-height:400px}
+.hero__visual canvas{width:100%;height:100%;border-radius:8px}
+.hero__scroll{position:absolute;bottom:var(--space-xl);right:var(--space-xl);display:flex;align-items:center;gap:var(--space-sm);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;writing-mode:vertical-rl}
+.hero__scroll-line{width:1px;height:40px;background:var(--color-text-muted);animation:scrollPulse 2s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:0.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.3)}}
+
+.btn{padding:12px 28px;border-radius:30px;font-size:var(--text-sm);font-weight:500;display:inline-flex;align-items:center;gap:var(--space-sm);transition:all var(--duration-normal) var(--ease-out-expo);cursor:pointer}
+.btn--primary{background:var(--color-accent);color:#fff}
+.btn--primary:hover{background:#ff7a52;transform:translateY(-2px);box-shadow:0 8px 30px var(--color-accent-glow)}
+.btn--ghost{border:1px solid var(--color-border);color:var(--color-text-primary)}
+.btn--ghost:hover{border-color:var(--color-text-primary);background:rgba(255,255,255,0.04)}
+
+@media(max-width:768px){
+  .hero__inner{grid-template-columns:1fr;text-align:center}
+  .hero__visual{min-height:250px;order:-1}
+  .hero__tagline{margin-inline:auto}
+  .hero__cta{justify-content:center}
+  .hero__scroll{display:none}
+}

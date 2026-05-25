@@ -1,0 +1,24 @@
+/* Contact */
+.contact__intro{font-size:var(--text-base);color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-xl);max-width:45ch}
+.contact__actions{display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-xl);flex-wrap:wrap}
+.contact__copied{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-accent);opacity:0;transition:opacity var(--duration-fast)}
+.contact__copied.show{opacity:1}
+.contact__social{margin-top:var(--space-xl);padding-top:var(--space-xl);border-top:1px solid var(--color-border)}
+.contact__social-label{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:var(--space-md)}
+.social-links{display:flex;gap:var(--space-lg);flex-wrap:wrap}
+.social-link{font-size:var(--text-sm);color:var(--color-text-secondary);transition:color var(--duration-fast);position:relative}
+.social-link::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:1px;background:var(--color-accent);transform:scaleX(0);transform-origin:right;transition:transform var(--duration-normal) var(--ease-out-expo)}
+.social-link:hover{color:var(--color-text-primary)}
+.social-link:hover::after{transform:scaleX(1);transform-origin:left}
+
+.contact__form{display:flex;flex-direction:column;gap:var(--space-lg)}
+.form__group{display:flex;flex-direction:column;gap:var(--space-xs)}
+.form__label{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.form__input{width:100%;padding:14px 0;background:none;border:none;border-bottom:1px solid var(--color-border);color:var(--color-text-primary);font-size:var(--text-base);transition:border-color var(--duration-fast)}
+.form__input:focus{border-bottom-color:var(--color-accent)}
+.form__textarea{resize:vertical;min-height:100px}
+
+.footer{padding:var(--space-xl);text-align:center;border-top:1px solid var(--color-border)}
+.footer__inner{max-width:var(--max-width);margin:0 auto}
+.footer__copy{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-sm)}
+.footer__built{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono)}

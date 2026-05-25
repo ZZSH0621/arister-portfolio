@@ -1,0 +1,18 @@
+/* Custom Cursor — morphs between dot / arrow / cross */
+.custom-cursor{position:fixed;top:0;left:0;width:var(--cursor-size);height:var(--cursor-size);border:2px solid var(--color-accent);border-radius:50%;pointer-events:none;z-index:var(--z-cursor);mix-blend-mode:difference;transition:width var(--duration-fast),height var(--duration-fast),border-color var(--duration-fast),opacity var(--duration-fast),border-radius var(--duration-fast);will-change:transform;display:flex;align-items:center;justify-content:center;overflow:visible}
+.custom-cursor--hidden{opacity:0}
+.custom-cursor--clicking{width:calc(var(--cursor-size) * 0.7);height:calc(var(--cursor-size) * 0.7)}
+
+/* SVG shape layers */
+.custom-cursor__shape{position:absolute;width:0;height:0;opacity:0;transition:opacity 0.2s ease,transform 0.2s ease;color:var(--color-accent)}
+/* Arrow: visible when in portfolio hover area */
+.custom-cursor--arrow .custom-cursor__arrow{width:28px;height:28px;opacity:1}
+/* Cross: visible when hovering clickable elements in portfolio */
+.custom-cursor--cross .custom-cursor__cross{width:22px;height:22px;opacity:1}
+/* Hide dot border when showing shapes */
+.custom-cursor--arrow,.custom-cursor--cross{border-color:transparent;border-radius:0}
+
+/* Hover: enlarge + ghost bg */
+.custom-cursor--hover{width:calc(var(--cursor-size) * 2.8);height:calc(var(--cursor-size) * 2.8);background:rgba(255,255,255,0.06);border-color:transparent}
+
+@media(pointer:coarse){.custom-cursor{display:none}}

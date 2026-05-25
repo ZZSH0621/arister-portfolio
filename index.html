@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Personal portfolio - Creative Developer">
+<meta property="og:title" content="Your Name - Portfolio">
+<meta property="og:description" content="Creative Developer / Designer">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/images/general/favicon.svg">
+<title>Your Name — Portfolio</title>
+
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/about.css">
+<link rel="stylesheet" href="css/portfolio.css">
+<link rel="stylesheet" href="css/blog.css">
+<link rel="stylesheet" href="css/contact.css">
+<link rel="stylesheet" href="css/cursor.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<script src="data/site-config.js"></script>
+<script src="data/translations.js"></script>
+<script src="data/projects.js"></script>
+<script src="data/blog-posts.js"></script>
+</head>
+<body>
+
+<div class="page-loader" aria-hidden="true">
+  <div class="loader-bar"></div>
+</div>
+
+<div class="custom-cursor" aria-hidden="true">
+  <svg class="custom-cursor__shape custom-cursor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  <svg class="custom-cursor__shape custom-cursor__cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+</div>
+
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#hero" class="nav__logo" data-i18n="hero.name">Your Name</a>
+    <nav class="nav__links" id="navLinks">
+      <a href="#hero" class="nav__link active" data-i18n="nav.home">Home</a>
+      <a href="#about" class="nav__link" data-i18n="nav.about">About</a>
+      <a href="#portfolio" class="nav__link" data-i18n="nav.portfolio">Portfolio</a>
+      <a href="#blog" class="nav__link" data-i18n="nav.blog">Blog</a>
+      <a href="#contact" class="nav__link" data-i18n="nav.contact">Contact</a>
+    </nav>
+    <div class="nav__actions">
+      <button class="nav__lang" data-lang-toggle data-i18n="lang.switch">EN</button>
+      <button class="nav__burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- Hero -->
+  <section id="hero" data-theme-color="#ff5e2c">
+    <div class="hero__inner">
+      <div class="hero__content">
+        <p class="hero__greeting" data-i18n="hero.greeting">你好，我是</p>
+        <h1 class="hero__name">
+          <span class="hero__name-line" data-reveal data-i18n="hero.name">你的名字</span>
+        </h1>
+        <p class="hero__role" data-reveal data-i18n="hero.role">创意开发者 / 设计师</p>
+        <p class="hero__tagline" data-reveal data-i18n="hero.tagline">专注于打造沉浸式的数字体验，用代码将创意变为现实。</p>
+        <div class="hero__cta" data-reveal>
+          <a href="#portfolio" class="btn btn--primary" data-i18n="hero.cta.portfolio">查看作品</a>
+          <a href="#contact" class="btn btn--ghost" data-i18n="hero.cta.contact">联系我</a>
+        </div>
+      </div>
+      <div class="hero__visual" id="heroVisual">
+        <canvas id="heroCanvas"></canvas>
+      </div>
+      <div class="hero__scroll">
+        <span data-i18n="hero.scroll">向下滚动</span>
+        <div class="hero__scroll-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" data-theme-color="#4d7cff">
+    <div class="section-inner">
+      <div class="grid-2">
+        <div class="about__sticky">
+          <p class="section-label" data-i18n="about.label">关于我</p>
+          <h2 class="section-heading" data-i18n="about.heading" data-reveal>让设计<span>与代码</span>对话</h2>
+        </div>
+        <div class="about__content">
+          <div class="about__bio" data-reveal>
+            <p data-i18n="about.bio1">我是一名专注于创意开发和交互设计的全栈开发者，致力于在技术与美学之间找到平衡。</p>
+            <p data-i18n="about.bio2">拥有多年的 Web 开发经验，擅长使用现代技术栈构建高性能、富有表现力的数字产品。</p>
+            <p data-i18n="about.bio3">目前作为自由职业者与全球各地的机构、公司和创业团队合作。</p>
+          </div>
+
+          <div class="about__accordion" data-reveal>
+            <div class="accordion__item">
+              <button class="accordion__trigger" aria-expanded="false">
+                <span data-i18n="about.experience">工作经历</span>
+                <span class="accordion__icon"></span>
+              </button>
+              <div class="accordion__content">
+                <div class="timeline">
+                  <div class="timeline__item">
+                    <div class="timeline__dot"></div>
+                    <div class="timeline__info">
+                      <h4 data-i18n="about.exp1.title">高级前端开发工程师</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp1.company">某科技公司</span> · <span data-i18n="about.exp1.period">2022 - 至今</span></p>
+                      <p data-i18n="about.exp1.desc">负责核心产品的前端架构设计与开发。</p>
+                    </div>
+                  </div>
+                  <div class="timeline__item">
+                    <div class="timeline__dot"></div>
+                    <div class="timeline__info">
+                      <h4 data-i18n="about.exp2.title">创意开发工程师</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp2.company">某设计工作室</span> · <span data-i18n="about.exp2.period">2020 - 2022</span></p>
+                      <p data-i18n="about.exp2.desc">为品牌客户打造创意互动网站。</p>
+                    </div>
+                  </div>
+                  <div class="timeline__item">
+                    <div class="timeline__dot"></div>
+                    <div class="timeline__info">
+                      <h4 data-i18n="about.exp3.title">自由职业开发者</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp3.company">自由职业</span> · <span data-i18n="about.exp3.period">2018 - 2020</span></p>
+                      <p data-i18n="about.exp3.desc">与多家机构合作提供技术服务。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion__item">
+              <button class="accordion__trigger" aria-expanded="false">
+                <span data-i18n="about.skills">技能</span>
+                <span class="accordion__icon"></span>
+              </button>
+              <div class="accordion__content">
+                <div class="skills__group">
+                  <h5 data-i18n="about.skill.frontend">前端开发</h5>
+                  <div class="skills__tags">
+                    <span class="skill-tag">HTML/CSS</span><span class="skill-tag">JavaScript</span><span class="skill-tag">TypeScript</span><span class="skill-tag">React</span><span class="skill-tag">Vue</span><span class="skill-tag">WebGL/Three.js</span><span class="skill-tag">GSAP</span>
+                  </div>
+                </div>
+                <div class="skills__group">
+                  <h5 data-i18n="about.skill.backend">后端开发</h5>
+                  <div class="skills__tags">
+                    <span class="skill-tag">Node.js</span><span class="skill-tag">Python</span><span class="skill-tag">PostgreSQL</span><span class="skill-tag">Redis</span><span class="skill-tag">GraphQL</span>
+                  </div>
+                </div>
+                <div class="skills__group">
+                  <h5 data-i18n="about.skill.design">设计工具</h5>
+                  <div class="skills__tags">
+                    <span class="skill-tag">Figma</span><span class="skill-tag">Blender</span><span class="skill-tag">After Effects</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion__item">
+              <button class="accordion__trigger" aria-expanded="false">
+                <span data-i18n="about.education">教育背景</span>
+                <span class="accordion__icon"></span>
+              </button>
+              <div class="accordion__content">
+                <div class="timeline">
+                  <div class="timeline__item">
+                    <div class="timeline__dot"></div>
+                    <div class="timeline__info">
+                      <h4 data-i18n="about.edu.title">计算机科学 学士</h4>
+                      <p class="timeline__meta"><span data-i18n="about.edu.school">某大学</span> · <span data-i18n="about.edu.period">2014 - 2018</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio -->
+  <section id="portfolio" data-theme-color="#ff3b8b">
+    <div class="section-inner">
+      <div class="portfolio__header">
+        <div>
+          <p class="section-label" data-i18n="portfolio.label">作品集</p>
+          <h2 class="section-heading" data-i18n="portfolio.heading" data-reveal>精选<span>项目</span></h2>
+        </div>
+        <div class="portfolio__counter">
+          <span class="portfolio__current" id="portCurrent">01</span>
+          <span class="portfolio__separator" data-i18n="portfolio.of">/</span>
+          <span class="portfolio__total" id="portTotal">06</span>
+        </div>
+      </div>
+
+      <!-- STACK VIEW: horizontal scroll -->
+      <div class="portfolio__stage" id="portfolioStage">
+        <div class="portfolio__track" id="portfolioTrack"></div>
+        <div class="portfolio__sidebar" id="portfolioSidebar"></div>
+        <button class="portfolio__arrow portfolio__arrow--left" id="portArrowLeft" aria-label="Previous project">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 4l-8 8 8 8"/></svg>
+        </button>
+        <button class="portfolio__arrow portfolio__arrow--right" id="portArrowRight" aria-label="Next project">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 4l8 8-8 8"/></svg>
+        </button>
+      </div>
+
+      <!-- CONTENT VIEW: expanded details -->
+      <div class="portfolio__content" id="portfolioContent">
+        <button class="portfolio__back" id="portfolioBack" aria-label="Back to projects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 4l-8 8 8 8"/></svg>
+          <span data-i18n="portfolio.back">返回</span>
+        </button>
+        <div class="portfolio__detail" id="portfolioDetail"></div>
+        <div class="portfolio__gallery-wrap">
+          <div class="portfolio__gallery" id="portfolioGallery"></div>
+        </div>
+      </div>
+
+      <p class="portfolio__hint">
+        <span>Drag</span> or <span>Scroll</span> to browse &nbsp;|&nbsp; <span>Click</span> to expand &nbsp;|&nbsp; <span>Scroll</span> to go back &nbsp;|&nbsp; <span>← →</span> navigate
+      </p>
+    </div>
+  </section>
+
+  <!-- Blog Preview -->
+  <section id="blog" data-theme-color="#00c9a7">
+    <div class="section-inner">
+      <div class="blog__header">
+        <div>
+          <p class="section-label" data-i18n="blog.label">博客</p>
+          <h2 class="section-heading" data-i18n="blog.heading" data-reveal>思考<span>与</span>分享</h2>
+        </div>
+        <a href="blog.html" class="btn btn--ghost" data-i18n="blog.all">全部文章</a>
+      </div>
+      <div class="blog__grid" id="blogGrid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" data-theme-color="#ff5e2c">
+    <div class="section-inner">
+      <div class="grid-2">
+        <div>
+          <p class="section-label" data-i18n="contact.label">联系</p>
+          <h2 class="section-heading" data-i18n="contact.heading" data-reveal>开始<span>对话</span></h2>
+          <p class="contact__intro" data-i18n="contact.intro">有项目想要合作？或者只是想打个招呼？随时联系我。</p>
+          <div class="contact__actions">
+            <a href="#" class="btn btn--primary contact__mailto" data-i18n="contact.email">发送邮件</a>
+            <button class="btn btn--ghost contact__copy" data-i18n="contact.copyEmail">复制邮箱</button>
+            <span class="contact__copied" id="copyFeedback" data-i18n="contact.copied">已复制！</span>
+          </div>
+          <div class="contact__social">
+            <p class="contact__social-label" data-i18n="contact.elsewhere">其他地方找到我</p>
+            <div class="social-links">
+              <a href="#" target="_blank" rel="noopener" class="social-link">GitHub</a>
+              <a href="#" target="_blank" rel="noopener" class="social-link">LinkedIn</a>
+              <a href="#" target="_blank" rel="noopener" class="social-link">Twitter</a>
+              <a href="#" target="_blank" rel="noopener" class="social-link">Dribbble</a>
+            </div>
+          </div>
+        </div>
+        <div class="contact__form-wrap" data-reveal>
+          <form class="contact__form" id="contactForm">
+            <div class="form__group">
+              <label class="form__label" data-i18n="contact.form.name">你的名字</label>
+              <input type="text" name="name" required class="form__input" data-i18n-placeholder="contact.form.name">
+            </div>
+            <div class="form__group">
+              <label class="form__label" data-i18n="contact.form.email">你的邮箱</label>
+              <input type="email" name="email" required class="form__input" data-i18n-placeholder="contact.form.email">
+            </div>
+            <div class="form__group">
+              <label class="form__label" data-i18n="contact.form.message">你想说的话...</label>
+              <textarea name="message" rows="5" required class="form__input form__textarea" data-i18n-placeholder="contact.form.message"></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary" data-i18n="contact.form.send">发送消息</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <p class="footer__copy">&copy; <span id="copyYear"></span> <span data-i18n="hero.name">Your Name</span> — <span data-i18n="footer.copyright">版权所有。</span></p>
+    <p class="footer__built" data-i18n="footer.built">从头手写构建，无框架依赖。</p>
+  </div>
+</footer>
+
+<!-- Three.js for WebGL effects -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+</script>
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/i18n.js"></script>
+<script src="js/core/theme.js"></script>
+<script src="js/components/navigation.js"></script>
+<script src="js/components/hero.js"></script>
+<script src="js/components/about.js"></script>
+<script src="js/components/portfolio.js"></script>
+<script src="js/components/cursor.js"></script>
+<script src="js/components/contact.js"></script>
+<script src="js/components/blog-preview.js"></script>
+<script src="js/components/webgl-distortion.js"></script>
+<script src="js/components/animations.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

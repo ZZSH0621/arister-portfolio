@@ -1,0 +1,55 @@
+:root{
+  --font-sans:'Inter','PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono','Cascadia Code','Fira Code',Consolas,monospace;
+  --font-display:'Clash Display','PingFang SC','Microsoft YaHei',sans-serif;
+
+  --text-xs:clamp(0.75rem,0.7rem + 0.2vw,0.8125rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.3vw,0.9375rem);
+  --text-base:clamp(1rem,0.9rem + 0.4vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.6vw,1.375rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.2vw,2.5rem);
+  --text-2xl:clamp(2rem,1.5rem + 2vw,4.5rem);
+  --text-3xl:clamp(3rem,2rem + 5vw,9rem);
+  --text-4xl:clamp(4rem,3rem + 7vw,13rem);
+
+  --space-xs:0.25rem;
+  --space-sm:0.5rem;
+  --space-md:1rem;
+  --space-lg:2rem;
+  --space-xl:4rem;
+  --space-2xl:8rem;
+  --space-3xl:12rem;
+  --space-section:clamp(5rem,8vw,12rem);
+
+  --color-bg:#08080a;
+  --color-surface:#121218;
+  --color-surface-raised:#1a1a24;
+  --color-text-primary:#f0ede8;
+  --color-text-secondary:#989690;
+  --color-text-muted:#5c5a55;
+  --color-accent:#ff5e2c;
+  --color-accent-glow:rgba(255,94,44,0.3);
+  --color-border:rgba(255,255,255,0.06);
+  --color-border-hover:rgba(255,255,255,0.15);
+
+  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+  --ease-out-back:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-in-out:cubic-bezier(0.65,0,0.35,1);
+  --duration-fast:150ms;
+  --duration-normal:400ms;
+  --duration-slow:700ms;
+  --duration-slower:1200ms;
+
+  --max-width:1400px;
+  --nav-height:72px;
+  --cursor-size:28px;
+
+  --z-base:1;
+  --z-content:10;
+  --z-nav:100;
+  --z-overlay:200;
+  --z-cursor:500;
+  --z-loader:1000;
+}
+
+[lang="zh-CN"]{--font-sans:'PingFang SC','Microsoft YaHei','Noto Sans SC','Inter',system-ui,-apple-system,sans-serif}

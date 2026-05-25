@@ -1,0 +1,21 @@
+/* Responsive */
+@media(max-width:1024px){
+  :root{--nav-height:64px}
+}
+@media(max-width:768px){
+  :root{--nav-height:56px}
+  section{padding:var(--space-xl) var(--space-md)}
+  .section-heading{text-align:center}
+  .section-label{text-align:center}
+  .portfolio__header{flex-direction:column;align-items:center;gap:var(--space-md)}
+  .portfolio__counter{font-size:var(--text-xl)}
+  .grid-2{grid-template-columns:1fr;gap:var(--space-lg)}
+  .about__bio{text-align:center}
+  .blog__header{flex-direction:column;align-items:center;gap:var(--space-md);text-align:center}
+  .contact__form-wrap{margin-top:var(--space-xl)}
+  .portfolio__instructions{display:none}
+}
+@media(max-width:480px){
+  .hero__name{font-size:clamp(3rem,10vw,5rem)}
+  .hero__role{font-size:var(--text-lg)}
+}
