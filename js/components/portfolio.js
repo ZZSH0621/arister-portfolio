@@ -394,8 +394,7 @@
     _onWheel:function(e){
       var now=Date.now();
       if(this._mode==='in'){
-        if(now-this._lastScrollTime>500){this._closeContent();this._lastScrollTime=now}
-        e.preventDefault();
+        // Scroll-to-close disabled — use back button only
         return;
       }
       if(this._mode==='focus'){
@@ -609,9 +608,7 @@
         document.addEventListener('mousemove',function(e){self._onMouseMove(e)});
         document.addEventListener('mouseup',function(e){self._onMouseUp(e)});
       }
-      if(this._contentEl){
-        this._contentEl.addEventListener('wheel',function(e){self._onWheel(e)},{passive:false});
-      }
+      // Detail view: scroll naturally, no wheel-to-close
 
       if(this._galleryEl){
         this._galleryEl.addEventListener('wheel',function(e){
