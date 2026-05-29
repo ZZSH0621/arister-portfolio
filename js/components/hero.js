@@ -54,35 +54,46 @@
             return;
           }
 
-          // Subtle temporal jitter (like analog signal instability)
-          float jitter=noise(vec2(uv.y*40.0,uTime*0.5))*0.003;
+          // Aggressive signal jitter — horizontal wobble
+          float jitter=noise(vec2(uv.y*25.0,uTime*0.7))*0.012;
+          jitter+=noise(vec2(uv.y*8.0,uTime*1.3))*0.006;
           uvCRT.x+=jitter;
+
+          // Vertical jitter — V-hold glitch
+          float vJitter=noise(vec2(uTime*0.9,0.0))*0.006;
+          uvCRT.y+=vJitter;
+
+          // Random horizontal glitch bands
+          float glitchBand=step(0.92,noise(vec2(uv.y*2.0,uTime*1.5)));
+          float glitchShift=glitchBand*noise(vec2(uv.y,uTime*2.0))*0.04;
+          uvCRT.x+=glitchShift;
 
           // Sample photo
           vec4 photo=texture2D(uPhoto,uvCRT);
 
-          // Subtle chromatic aberration at edges
+          // Stronger chromatic aberration at edges
           float edge=abs(centered.x)*2.0;
-          float caShift=edge*0.006;
+          float caShift=edge*0.012;
           float r=texture2D(uPhoto,uvCRT+vec2(caShift,0.0)).r;
           float b=texture2D(uPhoto,uvCRT-vec2(caShift,0.0)).b;
-          photo.r=mix(photo.r,r,edge*0.3);
-          photo.b=mix(photo.b,b,edge*0.3);
+          photo.r=mix(photo.r,r,edge*0.5);
+          photo.b=mix(photo.b,b,edge*0.5);
 
-          // Subtle phosphor glow: bright areas bleed slightly
+          // Phosphor glow: bright areas bleed
           float brightness=dot(photo.rgb,vec3(0.299,0.587,0.114));
-          float glow=smoothstep(0.6,1.0,brightness)*0.06;
+          float glow=smoothstep(0.6,1.0,brightness)*0.08;
           photo.rgb+=glow;
 
-          // CRT scanlines — subtle horizontal lines
+          // CRT scanlines
           float scanY=uvCRT.y*600.0;
-          float scanline=1.0-smoothstep(0.3,0.7,sin(scanY*3.14159)*0.5+0.5)*0.08;
+          float scanline=1.0-smoothstep(0.3,0.7,sin(scanY*3.14159)*0.5+0.5)*0.10;
 
-          // Fine phosphor mask pattern
-          float mask=1.0-smoothstep(0.4,0.6,sin(scanY*3.14159)*0.5+0.5)*0.03;
+          // Phosphor mask
+          float maskP=1.0-smoothstep(0.4,0.6,sin(scanY*3.14159)*0.5+0.5)*0.04;
 
-          // Very light film grain
-          float grain=noise(uv*300.0+uTime*0.8)*0.04-0.02;
+          // Aggressive film grain
+          float grain=noise(uv*250.0+uTime*1.2)*0.12-0.06;
+          grain+=noise(uv*80.0-uTime*0.6)*0.06-0.03;
 
           // Screen reflection sheen
           float sheen=(1.0-abs(centered.y))*0.08;
@@ -92,10 +103,10 @@
           float dist=length(centered)*1.3;
           float vignette=smoothstep(0.35,0.9,dist);
 
-          // Assemble: photo × scanlines × mask + grain + sheen + vignette
+          // Assemble
           vec3 col=photo.rgb;
           col*=scanline;
-          col*=mask;
+          col*=maskP;
           col+=grain;
           col+=sheen;
 
@@ -105,8 +116,17 @@
           // Subtle warm color cast
           col*=vec3(1.02,0.98,0.94);
 
-          // Slight brightness flicker
-          col*=1.0+noise(vec2(uTime*0.25,0.0))*0.02;
+          // Aggressive brightness & color flicker
+          float flicker=noise(vec2(uTime*0.4,0.0))*0.05;
+          flicker+=noise(vec2(uTime*1.5,1.0))*0.03;
+          col*=1.0+flicker;
+
+          // Occasional color channel glitch
+          float colorGlitch=step(0.94,noise(vec2(uTime*0.6,0.0)));
+          if(colorGlitch>0.5){
+            col.r+=noise(vec2(uv.y*10.0,uTime))*0.04;
+            col.b-=noise(vec2(uv.y*10.0,uTime+1.0))*0.04;
+          }
 
           // Outer bezel shadow (screen frame)
           float bezel=smoothstep(0.44,0.5,dist);
