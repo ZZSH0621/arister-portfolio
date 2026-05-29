@@ -54,18 +54,18 @@
             return;
           }
 
-          // Aggressive signal jitter — horizontal wobble
-          float jitter=noise(vec2(uv.y*25.0,uTime*0.7))*0.012;
-          jitter+=noise(vec2(uv.y*8.0,uTime*1.3))*0.006;
+          // Signal jitter — horizontal wobble (slowed)
+          float jitter=noise(vec2(uv.y*25.0,uTime*0.25))*0.012;
+          jitter+=noise(vec2(uv.y*8.0,uTime*0.4))*0.006;
           uvCRT.x+=jitter;
 
-          // Vertical jitter — V-hold glitch
-          float vJitter=noise(vec2(uTime*0.9,0.0))*0.006;
+          // Vertical jitter — V-hold glitch (slowed)
+          float vJitter=noise(vec2(uTime*0.3,0.0))*0.006;
           uvCRT.y+=vJitter;
 
-          // Random horizontal glitch bands
-          float glitchBand=step(0.92,noise(vec2(uv.y*2.0,uTime*1.5)));
-          float glitchShift=glitchBand*noise(vec2(uv.y,uTime*2.0))*0.04;
+          // Random horizontal glitch bands (slowed)
+          float glitchBand=step(0.92,noise(vec2(uv.y*2.0,uTime*0.5)));
+          float glitchShift=glitchBand*noise(vec2(uv.y,uTime*0.6))*0.04;
           uvCRT.x+=glitchShift;
 
           // Sample photo
@@ -91,9 +91,9 @@
           // Phosphor mask
           float maskP=1.0-smoothstep(0.4,0.6,sin(scanY*3.14159)*0.5+0.5)*0.04;
 
-          // Aggressive film grain
-          float grain=noise(uv*250.0+uTime*1.2)*0.12-0.06;
-          grain+=noise(uv*80.0-uTime*0.6)*0.06-0.03;
+          // Film grain (slowed)
+          float grain=noise(uv*250.0+uTime*0.4)*0.12-0.06;
+          grain+=noise(uv*80.0-uTime*0.2)*0.06-0.03;
 
           // Screen reflection sheen
           float sheen=(1.0-abs(centered.y))*0.08;
@@ -116,13 +116,13 @@
           // Subtle warm color cast
           col*=vec3(1.02,0.98,0.94);
 
-          // Aggressive brightness & color flicker
-          float flicker=noise(vec2(uTime*0.4,0.0))*0.05;
-          flicker+=noise(vec2(uTime*1.5,1.0))*0.03;
+          // Brightness & color flicker (slowed)
+          float flicker=noise(vec2(uTime*0.15,0.0))*0.05;
+          flicker+=noise(vec2(uTime*0.5,1.0))*0.03;
           col*=1.0+flicker;
 
-          // Occasional color channel glitch
-          float colorGlitch=step(0.94,noise(vec2(uTime*0.6,0.0)));
+          // Occasional color channel glitch (slowed)
+          float colorGlitch=step(0.94,noise(vec2(uTime*0.2,0.0)));
           if(colorGlitch>0.5){
             col.r+=noise(vec2(uv.y*10.0,uTime))*0.04;
             col.b-=noise(vec2(uv.y*10.0,uTime+1.0))*0.04;
