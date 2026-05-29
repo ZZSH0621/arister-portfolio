@@ -25,7 +25,7 @@
 
       // Load photo texture
       const loader=new THREE.TextureLoader();
-      const photoTex=loader.load('WebGL 复古电视特效.PNG');
+      const photoTex=loader.load('hero-photo.png');
 
       const geo=new THREE.PlaneGeometry(2.2,2.2);
       const mat=new THREE.ShaderMaterial({
