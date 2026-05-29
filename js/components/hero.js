@@ -1,5 +1,5 @@
 // js/components/hero.js
-// WebGL retro-TV effect with photo texture blended via shader
+// WebGL CRT-TV effect: photo displayed on a vintage television screen
 (function(){
   'use strict';
   const Hero={
@@ -42,41 +42,77 @@
         void main(){
           vec2 uv=vUv;
 
-          // TV-style scanline distortion on UV
-          float n1=noise(uv*8.0+uTime*0.08)*0.04;
-          float n2=noise(uv*15.0-uTime*0.05)*0.02;
-          vec2 uvDistorted=uv+vec2(n1,n2);
+          // CRT barrel distortion (screen curvature)
+          vec2 centered=uv-0.5;
+          float r2=dot(centered,centered);
+          float barrel=1.0+r2*0.08;
+          vec2 uvCRT=0.5+centered*barrel;
 
-          // Sample photo with distorted UV
-          vec4 photo=texture2D(uPhoto,uvDistorted);
+          // Clamp to screen bounds
+          if(uvCRT.x<0.0||uvCRT.x>1.0||uvCRT.y<0.0||uvCRT.y>1.0){
+            gl_FragColor=vec4(0.0,0.0,0.0,1.0);
+            return;
+          }
 
-          // Retro color shift (chromatic aberration)
-          float rShift=noise(uv*12.0+uTime*0.06)*0.015;
-          float bShift=noise(uv*12.0+uTime*0.07)*0.015;
-          float r=texture2D(uPhoto,uvDistorted+vec2(rShift,0.0)).r;
-          float b=texture2D(uPhoto,uvDistorted-vec2(bShift,0.0)).b;
-          photo.r=mix(photo.r,r,0.4);
-          photo.b=mix(photo.b,b,0.4);
+          // Subtle temporal jitter (like analog signal instability)
+          float jitter=noise(vec2(uv.y*40.0,uTime*0.5))*0.003;
+          uvCRT.x+=jitter;
 
-          // Noise grain overlay
-          float grain=noise(uv*80.0+uTime*0.5)*0.12-0.06;
+          // Sample photo
+          vec4 photo=texture2D(uPhoto,uvCRT);
 
-          // Scanlines
-          float scanline=sin(uv.y*800.0+uTime*0.2)*0.04;
+          // Subtle chromatic aberration at edges
+          float edge=abs(centered.x)*2.0;
+          float caShift=edge*0.006;
+          float r=texture2D(uPhoto,uvCRT+vec2(caShift,0.0)).r;
+          float b=texture2D(uPhoto,uvCRT-vec2(caShift,0.0)).b;
+          photo.r=mix(photo.r,r,edge*0.3);
+          photo.b=mix(photo.b,b,edge*0.3);
+
+          // Subtle phosphor glow: bright areas bleed slightly
+          float brightness=dot(photo.rgb,vec3(0.299,0.587,0.114));
+          float glow=smoothstep(0.6,1.0,brightness)*0.06;
+          photo.rgb+=glow;
+
+          // CRT scanlines — subtle horizontal lines
+          float scanY=uvCRT.y*600.0;
+          float scanline=1.0-smoothstep(0.3,0.7,sin(scanY*3.14159)*0.5+0.5)*0.08;
+
+          // Fine phosphor mask pattern
+          float mask=1.0-smoothstep(0.4,0.6,sin(scanY*3.14159)*0.5+0.5)*0.03;
+
+          // Very light film grain
+          float grain=noise(uv*300.0+uTime*0.8)*0.04-0.02;
+
+          // Screen reflection sheen
+          float sheen=(1.0-abs(centered.y))*0.08;
+          sheen*=smoothstep(0.2,0.0,abs(centered.x-0.15));
 
           // Vignette
-          float dist=distance(uv,vec2(0.5+sin(uTime*0.3)*0.15,0.5+cos(uTime*0.4)*0.15));
-          float vignette=smoothstep(0.0,1.0,dist*1.6);
+          float dist=length(centered)*1.3;
+          float vignette=smoothstep(0.35,0.9,dist);
 
-          // Blend: photo + noise grain + scanlines + color gradient overlay
-          vec3 col=photo.rgb+grain+scanline;
-          col=mix(col,uColor1,vignette*0.35);
-          col*=0.9+vignette*0.1;
+          // Assemble: photo × scanlines × mask + grain + sheen + vignette
+          vec3 col=photo.rgb;
+          col*=scanline;
+          col*=mask;
+          col+=grain;
+          col+=sheen;
+
+          // Edge darkening
+          col=mix(col,vec3(0.0),vignette*0.5);
+
+          // Subtle warm color cast
+          col*=vec3(1.02,0.98,0.94);
 
           // Slight brightness flicker
-          col*=1.0+noise(vec2(uTime*0.3,0.0))*0.04;
+          col*=1.0+noise(vec2(uTime*0.25,0.0))*0.02;
 
-          gl_FragColor=vec4(col,0.7+vignette*0.25);
+          // Outer bezel shadow (screen frame)
+          float bezel=smoothstep(0.44,0.5,dist);
+          col=mix(col,vec3(0.0),bezel*0.6);
+
+          gl_FragColor=vec4(col,1.0);
         }`
       });
       const mesh=new THREE.Mesh(geo,mat);
