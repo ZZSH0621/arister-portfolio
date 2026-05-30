@@ -239,25 +239,35 @@
         this._stripEls[idx+1].style.transform='translateX('+rnPos+'px)';
       }
 
-      // Overlay breaks out: full-stage width, letters with random spacing
+      // Overlay: dramatic typography for short names, simple for long
       if(this._focusOverlay){
         this._focusOverlay.style.left='0';
         this._focusOverlay.style.width='100%';
         var enName=p.title['en'].replace(/\(.*?\)/g,'').trim();
         var words=enName.split(/\s+/);
-        var seeded=idx*137+1;
-        var wordsHtml=words.map(function(w){
-          var chars=w.split('');
-          var charSpans=chars.map(function(c,i){
-            var rand=((Math.sin(seeded+i*31)+1)*0.18+0.12).toFixed(3);
-            return '<span class="portfolio__focus-char" style="color:'+p.themeColor+';margin-right:'+rand+'em">'+c+'</span>';
+        var useDramatic=words.length<=3;
+        var overlayHTML='';
+        if(useDramatic){
+          var seeded=idx*137+1;
+          var wordsHtml=words.map(function(w){
+            var chars=w.split('');
+            var charSpans=chars.map(function(c,i){
+              var rand=((Math.sin(seeded+i*31)+1)*0.18+0.12).toFixed(3);
+              return '<span class="portfolio__focus-char" style="color:'+p.themeColor+';margin-right:'+rand+'em">'+c+'</span>';
+            }).join('');
+            return '<div class="portfolio__focus-word">'+charSpans+'</div>';
           }).join('');
-          return '<div class="portfolio__focus-word">'+charSpans+'</div>';
-        }).join('');
-        this._focusOverlay.innerHTML=
-          wordsHtml+
-          '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
-          '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
+          overlayHTML=wordsHtml+
+            '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
+            '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
+        }else{
+          // Simple overlay for long-name projects
+          overlayHTML=
+            '<h3 class="portfolio__focus-title-en" style="color:'+p.themeColor+'">'+enName+'</h3>'+
+            '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
+            '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
+        }
+        this._focusOverlay.innerHTML=overlayHTML;
         this._focusOverlay.style.display='';
       }
 
@@ -329,7 +339,7 @@
 
       this._stageEl.style.display='none';
       this._contentEl.classList.add('active');
-      this._renderEditButton();
+      this._renderEditBar();
       this._updateCounter(idx);
       this._updateDots(idx);
 
@@ -353,18 +363,8 @@
         });
       }
 
-      // Double-click text to edit
-      if(this._detailEl){
-        this._detailEl.addEventListener('dblclick',function(e){
-          var target=e.target.closest('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
-          if(target){
-            self._enterEditMode();
-            target.focus();
-          }
-        });
-      }
-
       if(i18n._bindDOM)i18n._bindDOM();
+    },
     },
 
     _renderSlideViewer:function(slideIdx){
@@ -426,46 +426,110 @@
       });
     },
 
-    // ─── Edit mode ─────────────────────────────
-    _renderEditButton:function(){
+    // ─── Edit mode (✓ save / ✗ cancel) ──────────
+    _renderEditBar:function(){
       var self=this;
-      var btn=document.getElementById('portfolioEditBtn');
-      if(!btn){
-        btn=document.createElement('button');
-        btn.id='portfolioEditBtn';
-        btn.className='portfolio__edit-btn';
-        btn.textContent='Edit';
-        btn.addEventListener('click',function(e){
+      var bar=document.getElementById('portfolioEditBar');
+      if(!bar){
+        bar=document.createElement('div');
+        bar.id='portfolioEditBar';
+        bar.style.cssText='grid-column:1/-1;display:flex;gap:8px;align-items:center;justify-content:flex-end';
+        // Edit button
+        var editBtn=document.createElement('button');
+        editBtn.id='portfolioEditBtn';
+        editBtn.className='portfolio__edit-btn';
+        editBtn.textContent='Edit';
+        editBtn.addEventListener('click',function(e){
           e.stopPropagation();
-          self._toggleEditMode();
+          self._enterEditMode();
         });
-        this._contentEl.appendChild(btn);
+        bar.appendChild(editBtn);
+        // Save button (hidden until edit mode)
+        var saveBtn=document.createElement('button');
+        saveBtn.id='portfolioSaveBtn';
+        saveBtn.className='portfolio__edit-btn';
+        saveBtn.textContent='✓';
+        saveBtn.style.display='none';
+        saveBtn.addEventListener('click',function(e){
+          e.stopPropagation();
+          self._saveEditMode();
+        });
+        bar.appendChild(saveBtn);
+        // Cancel button (hidden until edit mode)
+        var cancelBtn=document.createElement('button');
+        cancelBtn.id='portfolioCancelBtn';
+        cancelBtn.className='portfolio__edit-btn';
+        cancelBtn.textContent='✗';
+        cancelBtn.style.display='none';
+        cancelBtn.addEventListener('click',function(e){
+          e.stopPropagation();
+          self._cancelEditMode();
+        });
+        bar.appendChild(cancelBtn);
+        this._contentEl.appendChild(bar);
       }
     },
 
     _enterEditMode:function(){
       if(this._editMode)return;
+      // Backup current state for cancel
+      this._editBackup={
+        detailHTML:this._detailEl.innerHTML,
+        slides:this._slides.map(function(s){return Object.assign({},s);})
+      };
       this._editMode=true;
       this._contentEl.classList.add('is-editing');
-      var btn=document.getElementById('portfolioEditBtn');
-      if(btn){btn.classList.add('is-active');btn.textContent='Done';}
-      // Make text fields editable
+      // Toggle buttons
+      var editBtn=document.getElementById('portfolioEditBtn');
+      var saveBtn=document.getElementById('portfolioSaveBtn');
+      var cancelBtn=document.getElementById('portfolioCancelBtn');
+      if(editBtn)editBtn.style.display='none';
+      if(saveBtn)saveBtn.style.display='';
+      if(cancelBtn)cancelBtn.style.display='';
+      // Make text editable
       var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
       fields.forEach(function(f){f.contentEditable='true';});
     },
 
-    _exitEditMode:function(){
-      this._editMode=false;
-      this._contentEl.classList.remove('is-editing');
-      var btn=document.getElementById('portfolioEditBtn');
-      if(btn){btn.classList.remove('is-active');btn.textContent='Edit';}
+    _saveEditMode:function(){
+      // Capture current text content
       var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
       fields.forEach(function(f){f.contentEditable='false';});
+      // Save text to savedDetailHTML so slide-0 restore works
+      if(this._currentSlide===0){
+        this._savedDetailHTML=this._detailEl.innerHTML;
+      }
+      this._editMode=false;
+      this._editBackup=null;
+      this._contentEl.classList.remove('is-editing');
+      var editBtn=document.getElementById('portfolioEditBtn');
+      var saveBtn=document.getElementById('portfolioSaveBtn');
+      var cancelBtn=document.getElementById('portfolioCancelBtn');
+      if(editBtn)editBtn.style.display='';
+      if(saveBtn)saveBtn.style.display='none';
+      if(cancelBtn)cancelBtn.style.display='none';
     },
 
-    _toggleEditMode:function(){
-      if(this._editMode){this._exitEditMode();}
-      else{this._enterEditMode();}
+    _cancelEditMode:function(){
+      // Restore from backup
+      if(this._editBackup){
+        this._detailEl.innerHTML=this._editBackup.detailHTML;
+        this._slides=this._editBackup.slides;
+        this._renderSlideViewer(this._currentSlide);
+        this._renderSlideStrip(this._currentSlide);
+        this._editBackup=null;
+      }
+      this._editMode=false;
+      this._contentEl.classList.remove('is-editing');
+      var editBtn=document.getElementById('portfolioEditBtn');
+      var saveBtn=document.getElementById('portfolioSaveBtn');
+      var cancelBtn=document.getElementById('portfolioCancelBtn');
+      if(editBtn)editBtn.style.display='';
+      if(saveBtn)saveBtn.style.display='none';
+      if(cancelBtn)cancelBtn.style.display='none';
+      // Disable contenteditable
+      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+      fields.forEach(function(f){f.contentEditable='false';});
     },
 
     _uploadToSlide:function(slideIdx){
@@ -482,7 +546,6 @@
           self._slides[slideIdx]={type:'image',src:dataUrl};
           self._renderSlideViewer(slideIdx);
           self._renderSlideStrip(self._currentSlide);
-          // Rebind
           var thumbs=App.Utils.qsa('.portfolio__slide-thumb',self._contentEl);
           thumbs.forEach(function(thumb,i){
             thumb.addEventListener('click',function(e2){
@@ -503,7 +566,7 @@
     },
 
     _closeContent:function(){
-      this._exitEditMode();
+      if(this._editMode)this._cancelEditMode();
       this._mode='out';
       this._contentEl.classList.remove('active');
       // Remove dynamic elements
@@ -511,8 +574,8 @@
       if(viewer)viewer.remove();
       var strip=document.getElementById('portfolioSlidesStrip');
       if(strip)strip.remove();
-      var editBtn=document.getElementById('portfolioEditBtn');
-      if(editBtn)editBtn.remove();
+      var editBar=document.getElementById('portfolioEditBar');
+      if(editBar)editBar.remove();
       this._stageEl.style.display='';
       this._updateDots(this._currentIdx);
     },
