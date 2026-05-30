@@ -315,6 +315,12 @@
       var lang=i18n.lang();
       var self=this;
 
+      // Load saved edits from localStorage (fallback)
+      try{
+        var stored=JSON.parse(localStorage.getItem('portfolioEdits'));
+        if(stored)this._projectEdits=stored;
+      }catch(e){}
+
       // Restore saved edits if they exist
       var edits=this._projectEdits[idx];
       if(edits&&edits.slides){
@@ -373,7 +379,6 @@
       }
 
       if(i18n._bindDOM)i18n._bindDOM();
-    },
     },
 
     _renderSlideViewer:function(slideIdx){
