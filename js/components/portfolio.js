@@ -488,6 +488,7 @@
     _saveEditMode:function(){
       var fields=this._detailEl.querySelectorAll('[contenteditable]');
       fields.forEach(function(f){f.contentEditable='false';});
+      var p=this._projects[this._currentIdx];
       this._projectEdits[this._currentIdx]={
         detailHTML:this._detailEl.innerHTML,
         slides:this._slides.map(function(s){return Object.assign({},s);}),
@@ -498,8 +499,7 @@
         images:p.images.slice()
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
-      // Sync edited text → project data (so focus overlay picks it up)
-      var p=this._projects[this._currentIdx];
+      // Sync edited text → project data
       var titleEl=this._detailEl.querySelector('.portfolio__detail-title');
       var descEl=this._detailEl.querySelector('.portfolio__detail-desc');
       var lang=window.App.I18n.lang();
