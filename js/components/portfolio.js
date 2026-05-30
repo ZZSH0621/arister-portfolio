@@ -412,33 +412,16 @@
     // ─── Edit mode ─────────────────────────────
     _renderEditBar:function(){
       var self=this;
-      var bar=document.getElementById('portfolioEditBar');
-      if(!bar){
-        bar=document.createElement('div');
-        bar.id='portfolioEditBar';
-        bar.className='portfolio__edit-bar';
-        var editBtn=document.createElement('button');
-        editBtn.textContent='Edit';
-        editBtn.onclick=function(e){e.stopPropagation();self._enterEditMode();};
-        bar.appendChild(editBtn);
-        var saveBtn=document.createElement('button');
-        saveBtn.textContent='Save';
-        saveBtn.className='edit-save-btn';
-        saveBtn.style.display='none';
-        saveBtn.onclick=function(e){e.stopPropagation();self._saveEditMode();};
-        bar.appendChild(saveBtn);
-        var cancelBtn=document.createElement('button');
-        cancelBtn.textContent='Cancel';
-        cancelBtn.style.display='none';
-        cancelBtn.onclick=function(e){e.stopPropagation();self._cancelEditMode();};
-        bar.appendChild(cancelBtn);
-        this._contentEl.appendChild(bar);
-      }
+      var editBtn=document.getElementById('editBtn');
+      var saveBtn=document.getElementById('editSaveBtn');
+      var cancelBtn=document.getElementById('editCancelBtn');
+      if(editBtn)editBtn.onclick=function(e){e.stopPropagation();self._enterEditMode();};
+      if(saveBtn)saveBtn.onclick=function(e){e.stopPropagation();self._saveEditMode();};
+      if(cancelBtn)cancelBtn.onclick=function(e){e.stopPropagation();self._cancelEditMode();};
     },
 
     _enterEditMode:function(){
       if(this._editMode)return;
-      var self=this;
       // Backup original state for cancel
       this._editBackup={
         innerHTML:this._detailEl.innerHTML,
@@ -447,37 +430,32 @@
       };
       this._editMode=true;
       this._contentEl.classList.add('is-editing');
-      // Toggle buttons
-      var bar=document.getElementById('portfolioEditBar');
-      if(bar){bar.children[0].style.display='none';bar.children[1].style.display='';bar.children[2].style.display='';}
-      // Make text editable
+      document.getElementById('editBtn').style.display='none';
+      document.getElementById('editSaveBtn').style.display='';
+      document.getElementById('editCancelBtn').style.display='';
       var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
       fields.forEach(function(f){f.contentEditable='true';});
-      // Bind slide interactions
       this._bindSlideEditEvents();
     },
 
     _saveEditMode:function(){
-      // Disable contentEditable
       var fields=this._detailEl.querySelectorAll('[contenteditable]');
       fields.forEach(function(f){f.contentEditable='false';});
-      // Save to memory
       this._projectEdits[this._currentIdx]={
         detailHTML:this._detailEl.innerHTML,
         slides:this._slides.map(function(s){return Object.assign({},s);}),
         currentSlide:this._currentSlide
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
-      // Exit
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
-      var bar=document.getElementById('portfolioEditBar');
-      if(bar){bar.children[0].style.display='';bar.children[1].style.display='none';bar.children[2].style.display='none';}
+      document.getElementById('editBtn').style.display='';
+      document.getElementById('editSaveBtn').style.display='none';
+      document.getElementById('editCancelBtn').style.display='none';
     },
 
     _cancelEditMode:function(){
-      // Restore from backup
       if(this._editBackup){
         this._detailEl.innerHTML=this._editBackup.innerHTML;
         this._slides=this._editBackup.slides;
@@ -490,8 +468,9 @@
       fields.forEach(function(f){f.contentEditable='false';});
       this._editMode=false;
       this._contentEl.classList.remove('is-editing');
-      var bar=document.getElementById('portfolioEditBar');
-      if(bar){bar.children[0].style.display='';bar.children[1].style.display='none';bar.children[2].style.display='none';}
+      document.getElementById('editBtn').style.display='';
+      document.getElementById('editSaveBtn').style.display='none';
+      document.getElementById('editCancelBtn').style.display='none';
       this._bindSlideEditEvents();
     },
 
