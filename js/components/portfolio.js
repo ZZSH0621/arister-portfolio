@@ -11,7 +11,6 @@
     _backBtn:null,
     _currentCnt:null,_totalCnt:null,
     _focusOverlay:null,
-    _editMode:false,_fileInput:null,_projectEdits:{},
 
     // Strip system
     _stripEls:[],
@@ -239,35 +238,25 @@
         this._stripEls[idx+1].style.transform='translateX('+rnPos+'px)';
       }
 
-      // Overlay: dramatic typography for short names, simple for long
+      // Overlay breaks out: full-stage width, letters with random spacing
       if(this._focusOverlay){
         this._focusOverlay.style.left='0';
         this._focusOverlay.style.width='100%';
         var enName=p.title['en'].replace(/\(.*?\)/g,'').trim();
         var words=enName.split(/\s+/);
-        var useDramatic=words.length<=3;
-        var overlayHTML='';
-        if(useDramatic){
-          var seeded=idx*137+1;
-          var wordsHtml=words.map(function(w){
-            var chars=w.split('');
-            var charSpans=chars.map(function(c,i){
-              var rand=((Math.sin(seeded+i*31)+1)*0.18+0.12).toFixed(3);
-              return '<span class="portfolio__focus-char" style="color:'+p.themeColor+';margin-right:'+rand+'em">'+c+'</span>';
-            }).join('');
-            return '<div class="portfolio__focus-word">'+charSpans+'</div>';
+        var seeded=idx*137+1;
+        var wordsHtml=words.map(function(w){
+          var chars=w.split('');
+          var charSpans=chars.map(function(c,i){
+            var rand=((Math.sin(seeded+i*31)+1)*0.18+0.12).toFixed(3);
+            return '<span class="portfolio__focus-char" style="color:'+p.themeColor+';margin-right:'+rand+'em">'+c+'</span>';
           }).join('');
-          overlayHTML=wordsHtml+
-            '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
-            '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
-        }else{
-          // Simple overlay for long-name projects
-          overlayHTML=
-            '<h3 class="portfolio__focus-title-en" style="color:'+p.themeColor+'">'+enName+'</h3>'+
-            '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
-            '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
-        }
-        this._focusOverlay.innerHTML=overlayHTML;
+          return '<div class="portfolio__focus-word">'+charSpans+'</div>';
+        }).join('');
+        this._focusOverlay.innerHTML=
+          wordsHtml+
+          '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
+          '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
         this._focusOverlay.style.display='';
       }
 
@@ -315,21 +304,23 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Restore from in-memory edits or build fresh
-      var edits=this._projectEdits[idx];
-      if(edits&&edits.detailHTML){
-        this._detailEl.innerHTML=edits.detailHTML;
-        this._savedDetailHTML=edits.detailHTML;
-        this._slides=edits.slides?edits.slides.map(function(s){return Object.assign({},s);}):[{type:'image',src:p.images[0]||p.thumbnail}];
-        this._currentSlide=edits.currentSlide||0;
-      }else{
-        this._slides=[{type:'image',src:p.images[0]||p.thumbnail}];
-        for(s=1;s<=5;s++){this._slides.push({type:'blank'});}
-        this._currentSlide=0;
-        var detailHTML=this._buildDetailHTML(p,lang);
-        this._savedDetailHTML=detailHTML;
-        this._detailEl.innerHTML=detailHTML;
-      }
+      // Build slides: main image + 5 blank pages
+      var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
+      for(var s=1;s<=5;s++){slides.push({type:'blank'});}
+      this._slides=slides;
+
+      // Render detail text (left column — preserved)
+      var detailHTML=
+        '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
+        '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
+        '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
+        '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
+        '<div class="portfolio__detail-links">'+
+          (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
+          (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
+        '</div>';
+      this._savedDetailHTML=detailHTML;
+      this._detailEl.innerHTML=detailHTML;
 
       // Build slide viewer + thumbnail strip HTML
       this._renderSlideViewer(0);
@@ -337,29 +328,16 @@
 
       this._stageEl.style.display='none';
       this._contentEl.classList.add('active');
-      this._renderEditBar();
       this._updateCounter(idx);
       this._updateDots(idx);
 
       // Bind thumbnail clicks
       var thumbs=App.Utils.qsa('.portfolio__slide-thumb',this._contentEl);
       thumbs.forEach(function(thumb,i){
-        thumb.addEventListener('click',function(e){
-          if(self._editMode){
-            self._uploadToSlide(i);
-          }else{
-            self._switchSlide(i);
-          }
+        thumb.addEventListener('click',function(){
+          self._switchSlide(i);
         });
       });
-
-      // Bind slide viewer click for image replacement in edit mode
-      var viewer=document.getElementById('portfolioSlideViewer');
-      if(viewer){
-        viewer.addEventListener('click',function(){
-          if(self._editMode)self._uploadToSlide(self._currentSlide);
-        });
-      }
 
       if(i18n._bindDOM)i18n._bindDOM();
     },
@@ -400,17 +378,6 @@
       }).join('');
     },
 
-    _buildDetailHTML:function(p,lang){
-      return '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
-        '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
-        '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
-        '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
-        '<div class="portfolio__detail-links">'+
-          (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
-          (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
-        '</div>';
-    },
-
     _switchSlide:function(slideIdx){
       if(slideIdx===this._currentSlide)return;
       this._currentSlide=slideIdx;
@@ -434,159 +401,14 @@
       });
     },
 
-    // ─── Edit mode (✓ save / ✗ cancel) ──────────
-    _renderEditBar:function(){
-      var self=this;
-      var bar=document.getElementById('portfolioEditBar');
-      if(!bar){
-        bar=document.createElement('div');
-        bar.id='portfolioEditBar';
-        bar.style.cssText='grid-column:2/4;grid-row:1;display:flex;gap:8px;align-items:center;justify-content:flex-end';
-        // Edit button
-        var editBtn=document.createElement('button');
-        editBtn.id='portfolioEditBtn';
-        editBtn.className='portfolio__edit-btn';
-        editBtn.textContent='Edit';
-        editBtn.addEventListener('click',function(e){
-          e.stopPropagation();
-          self._enterEditMode();
-        });
-        bar.appendChild(editBtn);
-        // Save button (hidden until edit mode)
-        var saveBtn=document.createElement('button');
-        saveBtn.id='portfolioSaveBtn';
-        saveBtn.className='portfolio__edit-btn';
-        saveBtn.textContent='✓';
-        saveBtn.style.display='none';
-        saveBtn.addEventListener('click',function(e){
-          e.stopPropagation();
-          self._saveEditMode();
-        });
-        bar.appendChild(saveBtn);
-        // Cancel button (hidden until edit mode)
-        var cancelBtn=document.createElement('button');
-        cancelBtn.id='portfolioCancelBtn';
-        cancelBtn.className='portfolio__edit-btn';
-        cancelBtn.textContent='✗';
-        cancelBtn.style.display='none';
-        cancelBtn.addEventListener('click',function(e){
-          e.stopPropagation();
-          self._cancelEditMode();
-        });
-        bar.appendChild(cancelBtn);
-        this._contentEl.appendChild(bar);
-      }
-    },
-
-    _enterEditMode:function(){
-      if(this._editMode)return;
-      // Backup current state for cancel
-      this._editBackup={
-        detailHTML:this._detailEl.innerHTML,
-        slides:this._slides.map(function(s){return Object.assign({},s);})
-      };
-      this._editMode=true;
-      this._contentEl.classList.add('is-editing');
-      // Toggle buttons
-      var editBtn=document.getElementById('portfolioEditBtn');
-      var saveBtn=document.getElementById('portfolioSaveBtn');
-      var cancelBtn=document.getElementById('portfolioCancelBtn');
-      if(editBtn)editBtn.style.display='none';
-      if(saveBtn)saveBtn.style.display='';
-      if(cancelBtn)cancelBtn.style.display='';
-      // Make text editable
-      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
-      fields.forEach(function(f){f.contentEditable='true';});
-    },
-
-    _saveEditMode:function(){
-      // Disable contentEditable
-      var fields=this._detailEl.querySelectorAll('[contenteditable]');
-      fields.forEach(function(f){f.contentEditable='false';});
-      // In-memory save (no storage API — guaranteed to work)
-      this._projectEdits[this._currentIdx]={
-        detailHTML:this._detailEl.innerHTML,
-        slides:this._slides.map(function(s){return Object.assign({},s);}),
-        currentSlide:this._currentSlide
-      };
-      this._savedDetailHTML=this._detailEl.innerHTML;
-      this._editMode=false;
-      this._editBackup=null;
-      this._contentEl.classList.remove('is-editing');
-      var editBtn=document.getElementById('portfolioEditBtn');
-      var saveBtn=document.getElementById('portfolioSaveBtn');
-      var cancelBtn=document.getElementById('portfolioCancelBtn');
-      if(editBtn){editBtn.style.display='';editBtn.textContent='Saved!';setTimeout(function(){if(editBtn)editBtn.textContent='Edit';},2000);}
-      if(saveBtn)saveBtn.style.display='none';
-      if(cancelBtn)cancelBtn.style.display='none';
-    },
-
-    _cancelEditMode:function(){
-      // Restore from backup
-      if(this._editBackup){
-        this._detailEl.innerHTML=this._editBackup.detailHTML;
-        this._slides=this._editBackup.slides;
-        this._renderSlideViewer(this._currentSlide);
-        this._renderSlideStrip(this._currentSlide);
-        this._editBackup=null;
-      }
-      this._editMode=false;
-      this._contentEl.classList.remove('is-editing');
-      var editBtn=document.getElementById('portfolioEditBtn');
-      var saveBtn=document.getElementById('portfolioSaveBtn');
-      var cancelBtn=document.getElementById('portfolioCancelBtn');
-      if(editBtn)editBtn.style.display='';
-      if(saveBtn)saveBtn.style.display='none';
-      if(cancelBtn)cancelBtn.style.display='none';
-      // Disable contenteditable
-      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
-      fields.forEach(function(f){f.contentEditable='false';});
-    },
-
-    _uploadToSlide:function(slideIdx){
-      var self=this;
-      var input=document.createElement('input');
-      input.type='file';
-      input.accept='image/*';
-      input.onchange=function(e){
-        var file=e.target.files[0];
-        if(!file)return;
-        var reader=new FileReader();
-        reader.onload=function(ev){
-          var dataUrl=ev.target.result;
-          self._slides[slideIdx]={type:'image',src:dataUrl};
-          self._renderSlideViewer(slideIdx);
-          self._renderSlideStrip(self._currentSlide);
-          var thumbs=App.Utils.qsa('.portfolio__slide-thumb',self._contentEl);
-          thumbs.forEach(function(thumb,i){
-            thumb.addEventListener('click',function(e2){
-              if(self._editMode){self._uploadToSlide(i);}
-              else{self._switchSlide(i);}
-            });
-          });
-          var viewer=document.getElementById('portfolioSlideViewer');
-          if(viewer){
-            viewer.addEventListener('click',function(){
-              if(self._editMode)self._uploadToSlide(self._currentSlide);
-            });
-          }
-        };
-        reader.readAsDataURL(file);
-      };
-      input.click();
-    },
-
     _closeContent:function(){
-      if(this._editMode)this._cancelEditMode();
       this._mode='out';
       this._contentEl.classList.remove('active');
-      // Remove dynamic elements
+      // Remove dynamic slide elements
       var viewer=document.getElementById('portfolioSlideViewer');
       if(viewer)viewer.remove();
       var strip=document.getElementById('portfolioSlidesStrip');
       if(strip)strip.remove();
-      var editBar=document.getElementById('portfolioEditBar');
-      if(editBar)editBar.remove();
       this._stageEl.style.display='';
       this._updateDots(this._currentIdx);
     },

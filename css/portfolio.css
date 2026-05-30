@@ -80,30 +80,10 @@
 .portfolio__dot:hover,.portfolio__dot.is-active{background:var(--color-accent);transform:scale(1.4)}
 
 /* Back button (detail view) */
-.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1;width:fit-content}
+.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1/-1;width:fit-content}
 .portfolio__back svg{width:16px;height:16px}
 .portfolio__back:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
 .portfolio__content.active .portfolio__back{display:inline-flex}
-
-/* Edit mode toggle */
-.portfolio__edit-btn{display:none;align-items:center;gap:var(--space-sm);padding:8px 16px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:3;justify-self:end}
-.portfolio__content.active .portfolio__edit-btn{display:inline-flex}
-.portfolio__edit-btn:hover{color:var(--color-accent);border-color:var(--color-accent)}
-.portfolio__edit-btn.is-active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
-/* Edit mode — text outlines */
-.portfolio__content.is-editing .portfolio__detail-title,
-.portfolio__content.is-editing .portfolio__detail-desc,
-.portfolio__content.is-editing .portfolio__detail-meta{outline:1px dashed var(--color-accent);outline-offset:4px;border-radius:2px;cursor:text;transition:outline 0.2s}
-.portfolio__content.is-editing .portfolio__detail-title:focus,
-.portfolio__content.is-editing .portfolio__detail-desc:focus,
-.portfolio__content.is-editing .portfolio__detail-meta:focus{outline:2px solid var(--color-accent);background:rgba(255,255,255,0.02)}
-/* Edit mode — image hover */
-.portfolio__content.is-editing .portfolio__slide-viewer{cursor:pointer}
-.portfolio__content.is-editing .portfolio__slide-viewer:hover::after{content:'Click to change';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);color:#fff;font-family:var(--font-mono);font-size:var(--text-sm);z-index:5;pointer-events:none}
-/* Edit mode — blank slide insert */
-.portfolio__content.is-editing .portfolio__slide-blank{cursor:pointer}
-.portfolio__content.is-editing .portfolio__slide-blank:hover{background:var(--color-surface-raised);border-color:var(--color-accent)}
-.portfolio__content.is-editing .portfolio__slide-blank:hover::after{content:'+ Insert';color:var(--color-accent)}
 
 /* ── CONTENT VIEW (PPT slide layout) ────────── */
 .portfolio__content{display:none;position:relative;width:100%;min-height:clamp(420px,60vh,650px)}
