@@ -11,6 +11,7 @@
     _backBtn:null,
     _currentCnt:null,_totalCnt:null,
     _focusOverlay:null,
+    _editMode:false,_fileInput:null,
 
     // Strip system
     _stripEls:[],
@@ -328,16 +329,40 @@
 
       this._stageEl.style.display='none';
       this._contentEl.classList.add('active');
+      this._renderEditButton();
       this._updateCounter(idx);
       this._updateDots(idx);
 
       // Bind thumbnail clicks
       var thumbs=App.Utils.qsa('.portfolio__slide-thumb',this._contentEl);
       thumbs.forEach(function(thumb,i){
-        thumb.addEventListener('click',function(){
-          self._switchSlide(i);
+        thumb.addEventListener('click',function(e){
+          if(self._editMode){
+            self._uploadToSlide(i);
+          }else{
+            self._switchSlide(i);
+          }
         });
       });
+
+      // Bind slide viewer click for image replacement in edit mode
+      var viewer=document.getElementById('portfolioSlideViewer');
+      if(viewer){
+        viewer.addEventListener('click',function(){
+          if(self._editMode)self._uploadToSlide(self._currentSlide);
+        });
+      }
+
+      // Double-click text to edit
+      if(this._detailEl){
+        this._detailEl.addEventListener('dblclick',function(e){
+          var target=e.target.closest('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+          if(target){
+            self._enterEditMode();
+            target.focus();
+          }
+        });
+      }
 
       if(i18n._bindDOM)i18n._bindDOM();
     },
@@ -401,14 +426,93 @@
       });
     },
 
+    // ─── Edit mode ─────────────────────────────
+    _renderEditButton:function(){
+      var self=this;
+      var btn=document.getElementById('portfolioEditBtn');
+      if(!btn){
+        btn=document.createElement('button');
+        btn.id='portfolioEditBtn';
+        btn.className='portfolio__edit-btn';
+        btn.textContent='Edit';
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          self._toggleEditMode();
+        });
+        this._contentEl.appendChild(btn);
+      }
+    },
+
+    _enterEditMode:function(){
+      if(this._editMode)return;
+      this._editMode=true;
+      this._contentEl.classList.add('is-editing');
+      var btn=document.getElementById('portfolioEditBtn');
+      if(btn){btn.classList.add('is-active');btn.textContent='Done';}
+      // Make text fields editable
+      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+      fields.forEach(function(f){f.contentEditable='true';});
+    },
+
+    _exitEditMode:function(){
+      this._editMode=false;
+      this._contentEl.classList.remove('is-editing');
+      var btn=document.getElementById('portfolioEditBtn');
+      if(btn){btn.classList.remove('is-active');btn.textContent='Edit';}
+      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+      fields.forEach(function(f){f.contentEditable='false';});
+    },
+
+    _toggleEditMode:function(){
+      if(this._editMode){this._exitEditMode();}
+      else{this._enterEditMode();}
+    },
+
+    _uploadToSlide:function(slideIdx){
+      var self=this;
+      var input=document.createElement('input');
+      input.type='file';
+      input.accept='image/*';
+      input.onchange=function(e){
+        var file=e.target.files[0];
+        if(!file)return;
+        var reader=new FileReader();
+        reader.onload=function(ev){
+          var dataUrl=ev.target.result;
+          self._slides[slideIdx]={type:'image',src:dataUrl};
+          self._renderSlideViewer(slideIdx);
+          self._renderSlideStrip(self._currentSlide);
+          // Rebind
+          var thumbs=App.Utils.qsa('.portfolio__slide-thumb',self._contentEl);
+          thumbs.forEach(function(thumb,i){
+            thumb.addEventListener('click',function(e2){
+              if(self._editMode){self._uploadToSlide(i);}
+              else{self._switchSlide(i);}
+            });
+          });
+          var viewer=document.getElementById('portfolioSlideViewer');
+          if(viewer){
+            viewer.addEventListener('click',function(){
+              if(self._editMode)self._uploadToSlide(self._currentSlide);
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    },
+
     _closeContent:function(){
+      this._exitEditMode();
       this._mode='out';
       this._contentEl.classList.remove('active');
-      // Remove dynamic slide elements
+      // Remove dynamic elements
       var viewer=document.getElementById('portfolioSlideViewer');
       if(viewer)viewer.remove();
       var strip=document.getElementById('portfolioSlidesStrip');
       if(strip)strip.remove();
+      var editBtn=document.getElementById('portfolioEditBtn');
+      if(editBtn)editBtn.remove();
       this._stageEl.style.display='';
       this._updateDots(this._currentIdx);
     },
