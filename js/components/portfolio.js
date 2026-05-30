@@ -449,6 +449,18 @@
         currentSlide:this._currentSlide
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
+      // Sync first slide image → project cover
+      var p=this._projects[this._currentIdx];
+      if(this._slides[0]&&this._slides[0].type==='image'){
+        p.thumbnail=this._slides[0].src;
+        p.images[0]=this._slides[0].src;
+        // Update just the strip thumbnail
+        var stripEl=this._stripEls[this._currentIdx];
+        if(stripEl){
+          var img=stripEl.querySelector('.portfolio__strip-img');
+          if(img)img.src=this._slides[0].src;
+        }
+      }
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
