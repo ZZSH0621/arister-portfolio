@@ -11,7 +11,7 @@
     _backBtn:null,
     _currentCnt:null,_totalCnt:null,
     _focusOverlay:null,
-    _editMode:false,_fileInput:null,
+    _editMode:false,_fileInput:null,_projectEdits:{},
 
     // Strip system
     _stripEls:[],
@@ -315,23 +315,32 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Build slides: main image + 5 blank pages
-      var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
-      for(var s=1;s<=5;s++){slides.push({type:'blank'});}
-      this._slides=slides;
+      // Restore saved edits if they exist
+      var edits=this._projectEdits[idx];
+      if(edits&&edits.slides){
+        this._slides=edits.slides.map(function(s){return Object.assign({},s);});
+        this._currentSlide=edits.currentSlide||0;
+        this._detailEl.innerHTML=edits.detailHTML;
+        this._savedDetailHTML=edits.savedDetailHTML||edits.detailHTML;
+      }else{
+        // Build slides: main image + 5 blank pages
+        var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
+        for(var s=1;s<=5;s++){slides.push({type:'blank'});}
+        this._slides=slides;
 
-      // Render detail text (left column — preserved)
-      var detailHTML=
-        '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
-        '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
-        '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
-        '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
-        '<div class="portfolio__detail-links">'+
-          (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
-          (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
-        '</div>';
-      this._savedDetailHTML=detailHTML;
-      this._detailEl.innerHTML=detailHTML;
+        // Render detail text (left column — preserved)
+        var detailHTML=
+          '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
+          '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
+          '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
+          '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
+          '<div class="portfolio__detail-links">'+
+            (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
+            (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
+          '</div>';
+        this._savedDetailHTML=detailHTML;
+        this._detailEl.innerHTML=detailHTML;
+      }
 
       // Build slide viewer + thumbnail strip HTML
       this._renderSlideViewer(0);
@@ -495,10 +504,14 @@
       // Capture current text content
       var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
       fields.forEach(function(f){f.contentEditable='false';});
-      // Save text to savedDetailHTML so slide-0 restore works
-      if(this._currentSlide===0){
-        this._savedDetailHTML=this._detailEl.innerHTML;
-      }
+      // Persist edits
+      this._projectEdits[this._currentIdx]={
+        detailHTML:this._detailEl.innerHTML,
+        savedDetailHTML:this._currentSlide===0?this._detailEl.innerHTML:this._savedDetailHTML,
+        slides:this._slides.map(function(s){return Object.assign({},s);}),
+        currentSlide:this._currentSlide
+      };
+      try{localStorage.setItem('portfolioEdits',JSON.stringify(this._projectEdits));}catch(e){}
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
