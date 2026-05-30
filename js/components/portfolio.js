@@ -104,8 +104,7 @@
         this._stripPositions.push(baseX);
         this._stripTargets.push(baseX);
         this._arcCurrents.push(0);
-        var thumbSrc=p.thumbnail;
-        var raw=localStorage.getItem('pe_'+i);if(raw){var ed=JSON.parse(raw);if(ed.thumbnail)thumbSrc=ed.thumbnail;}
+        var r=localStorage.getItem('pe_'+i);var ed=r?JSON.parse(r):null;var thumbSrc=(ed&&ed.thumbnail)?ed.thumbnail:p.thumbnail;
         html+='<div class="portfolio__strip" data-strip-idx="'+i+'" style="width:'+stripW+'px">'+
           '<div class="portfolio__strip-inner">'+
             '<img src="'+thumbSrc+'" alt="'+p.title[lang]+'" class="portfolio__strip-img" loading="'+(i<6?'eager':'lazy')+'">'+
@@ -268,8 +267,7 @@
         this._focusOverlay.style.left='0';
         this._focusOverlay.style.width='100%';
         // Use saved title from localStorage if available
-        var enTitle=p.title['en'];
-        var raw=localStorage.getItem('pe_'+idx);if(raw){var ed=JSON.parse(raw);if(ed.title&&ed.title['en'])enTitle=ed.title['en'];}
+        var enTitle=p.title['en'];var r=localStorage.getItem('pe_'+idx);if(r){var ed=JSON.parse(r);if(ed.title&&ed.title['en'])enTitle=ed.title['en'];}
         var enName=enTitle.replace(/\(.*?\)/g,'').trim();
         var words=enName.split(/\s+/);
         var seeded=idx*137+1;
