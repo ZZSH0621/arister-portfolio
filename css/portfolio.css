@@ -85,8 +85,7 @@
 .portfolio__back:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
 .portfolio__content.active .portfolio__back{display:inline-flex}
 /* Edit bar */
-.portfolio__edit-bar{display:none;grid-column:2/4;grid-row:1;align-items:center;justify-content:flex-end;gap:6px}
-.portfolio__content.active .portfolio__edit-bar{display:flex}
+.portfolio__edit-bar{grid-column:2/4;grid-row:1;align-items:center;justify-content:flex-end;gap:6px}
 .portfolio__edit-bar button{padding:7px 16px;border:1px solid var(--color-border);border-radius:20px;background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.2s}
 .portfolio__edit-bar button:hover{color:var(--color-accent);border-color:var(--color-accent)}
 .portfolio__edit-bar .edit-save-btn{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}

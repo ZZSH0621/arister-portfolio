@@ -336,6 +336,8 @@
       this._stageEl.style.display='none';
       this._contentEl.classList.add('active');
       this._renderEditBar();
+      var bar=document.getElementById('portfolioEditBar');
+      if(bar)bar.style.display='flex';
       this._updateCounter(idx);
       this._updateDots(idx);
 
@@ -514,6 +516,8 @@
       if(this._editMode)this._cancelEditMode();
       this._mode='out';
       this._contentEl.classList.remove('active');
+      var bar=document.getElementById('portfolioEditBar');
+      if(bar)bar.style.display='none';
       // Remove dynamic slide elements
       var viewer=document.getElementById('portfolioSlideViewer');
       if(viewer)viewer.remove();
