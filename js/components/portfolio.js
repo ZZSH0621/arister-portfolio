@@ -61,6 +61,7 @@
     },
 
     _loadEditsFromStorage:function(){
+      var found=[];
       for(var i=0;i<this._projects.length;i++){
         var raw=localStorage.getItem('pe_'+i);
         if(!raw)continue;
@@ -72,7 +73,11 @@
         if(edits.thumbnail){p.thumbnail=edits.thumbnail;}
         if(edits.images){p.images=edits.images.slice();}
         this._projectEdits[i]=edits;
+        found.push(i);
       }
+      // Diagnostic: show if edits were found
+      var el=document.getElementById('portfolioEditBar');
+      if(el&&found.length)el.setAttribute('data-edits',found.join(','));
     },
 
     _restoreSavedThumbnails:function(){
