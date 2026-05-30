@@ -310,7 +310,7 @@
       this._slides=slides;
 
       // Render detail text (left column — preserved)
-      this._detailEl.innerHTML=
+      var detailHTML=
         '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
         '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
         '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
@@ -319,6 +319,8 @@
           (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
           (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
         '</div>';
+      this._savedDetailHTML=detailHTML;
+      this._detailEl.innerHTML=detailHTML;
 
       // Build slide viewer + thumbnail strip HTML
       this._renderSlideViewer(0);
@@ -381,6 +383,15 @@
       this._currentSlide=slideIdx;
       this._renderSlideViewer(slideIdx);
       this._renderSlideStrip(slideIdx);
+      // Update detail panel: show info for slide 0, blank for others
+      if(slideIdx===0){
+        this._detailEl.innerHTML=this._savedDetailHTML||'';
+      }else{
+        this._detailEl.innerHTML=
+          '<h3 class="portfolio__detail-title" style="color:var(--color-text-muted)">Slide '+(slideIdx+1)+'</h3>'+
+          '<p class="portfolio__detail-meta">—</p>'+
+          '<p class="portfolio__detail-desc" style="color:var(--color-text-muted)">待编辑内容</p>';
+      }
       var self=this;
       var thumbs=App.Utils.qsa('.portfolio__slide-thumb',this._contentEl);
       thumbs.forEach(function(thumb,i){
