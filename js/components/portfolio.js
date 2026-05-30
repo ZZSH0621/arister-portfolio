@@ -109,9 +109,11 @@
         this._stripTargets.push(baseX);
         this._arcCurrents.push(0);
         var thumbSrc=p.thumbnail;
-        // Use saved thumbnail if available
-        var savedEdits=this._projectEdits[i];
-        if(savedEdits&&savedEdits.thumbnail)thumbSrc=savedEdits.thumbnail;
+        // Direct localStorage check — bypass everything
+        try{
+          var ls=JSON.parse(localStorage.getItem('portfolioEdits'));
+          if(ls&&ls[i]&&ls[i].thumbnail)thumbSrc=ls[i].thumbnail;
+        }catch(e){}
         html+='<div class="portfolio__strip" data-strip-idx="'+i+'" style="width:'+stripW+'px">'+
           '<div class="portfolio__strip-inner">'+
             '<img src="'+thumbSrc+'" alt="'+p.title[lang]+'" class="portfolio__strip-img" loading="'+(i<6?'eager':'lazy')+'">'+
@@ -273,7 +275,13 @@
       if(this._focusOverlay){
         this._focusOverlay.style.left='0';
         this._focusOverlay.style.width='100%';
-        var enName=p.title['en'].replace(/\(.*?\)/g,'').trim();
+        // Use saved title from localStorage if available
+        var enTitle=p.title['en'];
+        try{
+          var ls=JSON.parse(localStorage.getItem('portfolioEdits'));
+          if(ls&&ls[idx]&&ls[idx].title&&ls[idx].title['en'])enTitle=ls[idx].title['en'];
+        }catch(e){}
+        var enName=enTitle.replace(/\(.*?\)/g,'').trim();
         var words=enName.split(/\s+/);
         var seeded=idx*137+1;
         var wordsHtml=words.map(function(w){
