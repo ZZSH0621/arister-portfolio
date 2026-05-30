@@ -449,8 +449,14 @@
         currentSlide:this._currentSlide
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
-      // Sync first slide image → project cover
+      // Sync edited text → project data (so focus overlay picks it up)
       var p=this._projects[this._currentIdx];
+      var titleEl=this._detailEl.querySelector('.portfolio__detail-title');
+      var descEl=this._detailEl.querySelector('.portfolio__detail-desc');
+      var lang=window.App.I18n.lang();
+      if(titleEl)p.title[lang]=titleEl.textContent.trim();
+      if(descEl)p.description[lang]=descEl.textContent.trim();
+      // Sync first slide image → project cover
       if(this._slides[0]&&this._slides[0].type==='image'){
         p.thumbnail=this._slides[0].src;
         p.images[0]=this._slides[0].src;
