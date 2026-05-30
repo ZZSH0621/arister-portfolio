@@ -315,10 +315,10 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Load saved edits from localStorage (fallback)
+      // Always load saved edits from localStorage
       try{
         var stored=JSON.parse(localStorage.getItem('portfolioEdits'));
-        if(stored)this._projectEdits=stored;
+        if(stored)for(var k in stored)this._projectEdits[k]=stored[k];
       }catch(e){}
 
       // Restore saved edits if they exist
@@ -506,26 +506,39 @@
     },
 
     _saveEditMode:function(){
-      // Capture current text content
-      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
-      fields.forEach(function(f){f.contentEditable='false';});
-      // Persist edits
-      this._projectEdits[this._currentIdx]={
-        detailHTML:this._detailEl.innerHTML,
-        savedDetailHTML:this._currentSlide===0?this._detailEl.innerHTML:this._savedDetailHTML,
-        slides:this._slides.map(function(s){return Object.assign({},s);}),
-        currentSlide:this._currentSlide
-      };
-      try{localStorage.setItem('portfolioEdits',JSON.stringify(this._projectEdits));}catch(e){}
-      this._editMode=false;
-      this._editBackup=null;
-      this._contentEl.classList.remove('is-editing');
-      var editBtn=document.getElementById('portfolioEditBtn');
-      var saveBtn=document.getElementById('portfolioSaveBtn');
-      var cancelBtn=document.getElementById('portfolioCancelBtn');
-      if(editBtn)editBtn.style.display='';
-      if(saveBtn)saveBtn.style.display='none';
-      if(cancelBtn)cancelBtn.style.display='none';
+      var self=this;
+      // Force blur all editable fields to finalize innerHTML
+      var fields=this._detailEl.querySelectorAll('[contenteditable]');
+      fields.forEach(function(f){f.blur();});
+      // Small delay to ensure DOM updates
+      setTimeout(function(){
+        // Capture current text content
+        var fields2=self._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+        fields2.forEach(function(f){f.contentEditable='false';});
+        // Persist edits
+        var saveData={
+          detailHTML:self._detailEl.innerHTML,
+          savedDetailHTML:self._currentSlide===0?self._detailEl.innerHTML:self._savedDetailHTML,
+          slides:self._slides.map(function(s){return Object.assign({},s);}),
+          currentSlide:self._currentSlide
+        };
+        self._projectEdits[self._currentIdx]=saveData;
+        // Save to localStorage immediately
+        try{
+          localStorage.setItem('portfolioEdits',JSON.stringify(self._projectEdits));
+        }catch(e){}
+        self._editMode=false;
+        self._editBackup=null;
+        self._contentEl.classList.remove('is-editing');
+        var editBtn=document.getElementById('portfolioEditBtn');
+        var saveBtn=document.getElementById('portfolioSaveBtn');
+        var cancelBtn=document.getElementById('portfolioCancelBtn');
+        if(editBtn)editBtn.style.display='';
+        if(saveBtn)saveBtn.style.display='none';
+        if(cancelBtn)cancelBtn.style.display='none';
+        // Flash brief confirmation
+        if(editBtn){editBtn.textContent='Saved!';setTimeout(function(){editBtn.textContent='Edit';},1500);}
+      },50);
     },
 
     _cancelEditMode:function(){
