@@ -35,6 +35,8 @@
     init:function(projects){
       var self=this;
       this._projects=projects||window.__PROJECTS||[];
+      // Load saved edits from localStorage BEFORE any rendering
+      this._loadEditsFromStorage();
       this._stageEl=document.getElementById('portfolioStage');
       this._trackEl=document.getElementById('portfolioTrack');
       this._sidebarEl=document.getElementById('portfolioSidebar');
@@ -58,30 +60,27 @@
       this._restoreSavedThumbnails();
     },
 
-    _restoreSavedThumbnails:function(){
-      var self=this;
+    _loadEditsFromStorage:function(){
       try{
         var stored=JSON.parse(localStorage.getItem('portfolioEdits'));
-        if(stored){
-          for(var k in stored){
-            var edits=stored[k];
-            var p=self._projects[k];
-            if(!edits||!p)continue;
-            // Restore title
-            if(edits.title){for(var tk in edits.title)p.title[tk]=edits.title[tk];}
-            // Restore description
-            if(edits.description){for(var dk in edits.description)p.description[dk]=edits.description[dk];}
-            // Restore thumbnail and images
-            if(edits.thumbnail){p.thumbnail=edits.thumbnail;}
-            if(edits.images){p.images=edits.images.slice();}
-            // Update strip thumbnail DOM
-            if(edits.thumbnail&&self._stripEls[k]){
-              var img=self._stripEls[k].querySelector('.portfolio__strip-img');
-              if(img)img.src=edits.thumbnail;
-            }
-          }
+        if(!stored)return;
+        for(var k in stored){
+          var edits=stored[k];
+          var p=this._projects[k];
+          if(!edits||!p)continue;
+          // Restore to source data — this is what focus overlay reads
+          if(edits.title){for(var tk in edits.title)p.title[tk]=edits.title[tk];}
+          if(edits.description){for(var dk in edits.description)p.description[dk]=edits.description[dk];}
+          if(edits.thumbnail){p.thumbnail=edits.thumbnail;}
+          if(edits.images){p.images=edits.images.slice();}
+          // Also load into in-memory cache
+          this._projectEdits[k]=edits;
         }
       }catch(e){}
+    },
+
+    _restoreSavedThumbnails:function(){
+      // Legacy — handled by _loadEditsFromStorage now
     },
 
     // ─── Render compressed strips ──────────────────
@@ -109,9 +108,13 @@
         this._stripPositions.push(baseX);
         this._stripTargets.push(baseX);
         this._arcCurrents.push(0);
+        var thumbSrc=p.thumbnail;
+        // Use saved thumbnail if available
+        var savedEdits=this._projectEdits[i];
+        if(savedEdits&&savedEdits.thumbnail)thumbSrc=savedEdits.thumbnail;
         html+='<div class="portfolio__strip" data-strip-idx="'+i+'" style="width:'+stripW+'px">'+
           '<div class="portfolio__strip-inner">'+
-            '<img src="'+p.thumbnail+'" alt="'+p.title[lang]+'" class="portfolio__strip-img" loading="'+(i<6?'eager':'lazy')+'">'+
+            '<img src="'+thumbSrc+'" alt="'+p.title[lang]+'" class="portfolio__strip-img" loading="'+(i<6?'eager':'lazy')+'">'+
             '<div class="portfolio__strip-number">'+String(i+1).padStart(2,'0')+'</div>'+
           '</div></div>';
       }
