@@ -315,37 +315,17 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Load saved edits from sessionStorage
-      try{
-        var stored=JSON.parse(sessionStorage.getItem('portfolioEdits'));
-        if(stored)for(var k in stored)this._projectEdits[k]=stored[k];
-      }catch(e){}
-
-      // Restore from saved edits or build fresh
+      // Restore from in-memory edits or build fresh
       var edits=this._projectEdits[idx];
-      if(edits){
-        // Slides
-        if(edits.slides){
-          this._slides=edits.slides.map(function(s){return Object.assign({},s);});
-          this._currentSlide=edits.currentSlide||0;
-        }else{
-          var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
-          for(var s=1;s<=5;s++){slides.push({type:'blank'});}
-          this._slides=slides;
-        }
-        // Detail panel
-        if(edits.detailHTML){
-          this._detailEl.innerHTML=edits.detailHTML;
-          this._savedDetailHTML=edits.detailHTML;
-        }else{
-          var detailHTML=this._buildDetailHTML(p,lang);
-          this._savedDetailHTML=detailHTML;
-          this._detailEl.innerHTML=detailHTML;
-        }
+      if(edits&&edits.detailHTML){
+        this._detailEl.innerHTML=edits.detailHTML;
+        this._savedDetailHTML=edits.detailHTML;
+        this._slides=edits.slides?edits.slides.map(function(s){return Object.assign({},s);}):[{type:'image',src:p.images[0]||p.thumbnail}];
+        this._currentSlide=edits.currentSlide||0;
       }else{
-        var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
-        for(var s=1;s<=5;s++){slides.push({type:'blank'});}
-        this._slides=slides;
+        this._slides=[{type:'image',src:p.images[0]||p.thumbnail}];
+        for(s=1;s<=5;s++){this._slides.push({type:'blank'});}
+        this._currentSlide=0;
         var detailHTML=this._buildDetailHTML(p,lang);
         this._savedDetailHTML=detailHTML;
         this._detailEl.innerHTML=detailHTML;
@@ -520,17 +500,15 @@
     },
 
     _saveEditMode:function(){
-      // Disable contentEditable first to finalize DOM
+      // Disable contentEditable
       var fields=this._detailEl.querySelectorAll('[contenteditable]');
       fields.forEach(function(f){f.contentEditable='false';});
-      // Save everything: detail panel HTML + slides
-      var saveData={
+      // In-memory save (no storage API — guaranteed to work)
+      this._projectEdits[this._currentIdx]={
         detailHTML:this._detailEl.innerHTML,
         slides:this._slides.map(function(s){return Object.assign({},s);}),
         currentSlide:this._currentSlide
       };
-      this._projectEdits[this._currentIdx]=saveData;
-      try{sessionStorage.setItem('portfolioEdits',JSON.stringify(this._projectEdits));}catch(e){}
       this._savedDetailHTML=this._detailEl.innerHTML;
       this._editMode=false;
       this._editBackup=null;
@@ -538,7 +516,7 @@
       var editBtn=document.getElementById('portfolioEditBtn');
       var saveBtn=document.getElementById('portfolioSaveBtn');
       var cancelBtn=document.getElementById('portfolioCancelBtn');
-      if(editBtn){editBtn.style.display='';editBtn.textContent='Edit';}
+      if(editBtn){editBtn.style.display='';editBtn.textContent='Saved!';setTimeout(function(){if(editBtn)editBtn.textContent='Edit';},2000);}
       if(saveBtn)saveBtn.style.display='none';
       if(cancelBtn)cancelBtn.style.display='none';
     },
