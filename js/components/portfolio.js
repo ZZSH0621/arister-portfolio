@@ -11,6 +11,7 @@
     _backBtn:null,
     _currentCnt:null,_totalCnt:null,
     _focusOverlay:null,
+    _editMode:false,_projectEdits:{},
 
     // Strip system
     _stripEls:[],
@@ -304,34 +305,41 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Build slides: main image + 5 blank pages
-      var slides=[{type:'image',src:p.images[0]||p.thumbnail}];
-      for(var s=1;s<=5;s++){slides.push({type:'blank'});}
-      this._slides=slides;
+      // Restore saved edits or build fresh
+      var saved=this._projectEdits[idx];
+      if(saved&&saved.detailHTML){
+        this._detailEl.innerHTML=saved.detailHTML;
+        this._savedDetailHTML=saved.detailHTML;
+        this._slides=saved.slides?saved.slides.map(function(s){return Object.assign({},s);}):[{type:'image',src:p.images[0]||p.thumbnail}];
+        this._currentSlide=saved.currentSlide||0;
+      }else{
+        this._slides=[{type:'image',src:p.images[0]||p.thumbnail}];
+        for(var s=1;s<=5;s++){this._slides.push({type:'blank'});}
+        this._currentSlide=0;
+        var detailHTML=
+          '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
+          '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
+          '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
+          '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
+          '<div class="portfolio__detail-links">'+
+            (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
+            (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
+          '</div>';
+        this._savedDetailHTML=detailHTML;
+        this._detailEl.innerHTML=detailHTML;
+      }
 
-      // Render detail text (left column — preserved)
-      var detailHTML=
-        '<h3 class="portfolio__detail-title">'+p.title[lang]+'</h3>'+
-        '<p class="portfolio__detail-meta">'+p.category[lang]+' · '+p.year+'</p>'+
-        '<p class="portfolio__detail-desc">'+p.description[lang]+'</p>'+
-        '<div class="portfolio__detail-tags">'+p.technologies.map(function(t){return '<span class="portfolio__detail-tag">'+t+'</span>'}).join('')+'</div>'+
-        '<div class="portfolio__detail-links">'+
-          (p.links.live?'<a href="'+p.links.live+'" target="_blank" rel="noopener" class="btn btn--primary" data-i18n="portfolio.visitSite">Visit Site</a>':'')+
-          (p.links.github?'<a href="'+p.links.github+'" target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="portfolio.sourceCode">Source Code</a>':'')+
-        '</div>';
-      this._savedDetailHTML=detailHTML;
-      this._detailEl.innerHTML=detailHTML;
-
-      // Build slide viewer + thumbnail strip HTML
-      this._renderSlideViewer(0);
-      this._renderSlideStrip(0);
+      // Build slide viewer + thumbnail strip
+      this._renderSlideViewer(this._currentSlide);
+      this._renderSlideStrip(this._currentSlide);
 
       this._stageEl.style.display='none';
       this._contentEl.classList.add('active');
+      this._renderEditBar();
       this._updateCounter(idx);
       this._updateDots(idx);
 
-      // Bind thumbnail clicks
+      // Bind slide clicks
       var thumbs=App.Utils.qsa('.portfolio__slide-thumb',this._contentEl);
       thumbs.forEach(function(thumb,i){
         thumb.addEventListener('click',function(){
@@ -401,7 +409,130 @@
       });
     },
 
+    // ─── Edit mode ─────────────────────────────
+    _renderEditBar:function(){
+      var self=this;
+      var bar=document.getElementById('portfolioEditBar');
+      if(!bar){
+        bar=document.createElement('div');
+        bar.id='portfolioEditBar';
+        bar.className='portfolio__edit-bar';
+        var editBtn=document.createElement('button');
+        editBtn.textContent='Edit';
+        editBtn.onclick=function(e){e.stopPropagation();self._enterEditMode();};
+        bar.appendChild(editBtn);
+        var saveBtn=document.createElement('button');
+        saveBtn.textContent='Save';
+        saveBtn.className='edit-save-btn';
+        saveBtn.style.display='none';
+        saveBtn.onclick=function(e){e.stopPropagation();self._saveEditMode();};
+        bar.appendChild(saveBtn);
+        var cancelBtn=document.createElement('button');
+        cancelBtn.textContent='Cancel';
+        cancelBtn.style.display='none';
+        cancelBtn.onclick=function(e){e.stopPropagation();self._cancelEditMode();};
+        bar.appendChild(cancelBtn);
+        this._contentEl.appendChild(bar);
+      }
+    },
+
+    _enterEditMode:function(){
+      if(this._editMode)return;
+      var self=this;
+      // Backup original state for cancel
+      this._editBackup={
+        innerHTML:this._detailEl.innerHTML,
+        slides:this._slides.map(function(s){return Object.assign({},s);}),
+        currentSlide:this._currentSlide
+      };
+      this._editMode=true;
+      this._contentEl.classList.add('is-editing');
+      // Toggle buttons
+      var bar=document.getElementById('portfolioEditBar');
+      if(bar){bar.children[0].style.display='none';bar.children[1].style.display='';bar.children[2].style.display='';}
+      // Make text editable
+      var fields=this._detailEl.querySelectorAll('.portfolio__detail-title,.portfolio__detail-desc,.portfolio__detail-meta');
+      fields.forEach(function(f){f.contentEditable='true';});
+      // Bind slide interactions
+      this._bindSlideEditEvents();
+    },
+
+    _saveEditMode:function(){
+      // Disable contentEditable
+      var fields=this._detailEl.querySelectorAll('[contenteditable]');
+      fields.forEach(function(f){f.contentEditable='false';});
+      // Save to memory
+      this._projectEdits[this._currentIdx]={
+        detailHTML:this._detailEl.innerHTML,
+        slides:this._slides.map(function(s){return Object.assign({},s);}),
+        currentSlide:this._currentSlide
+      };
+      this._savedDetailHTML=this._detailEl.innerHTML;
+      // Exit
+      this._editMode=false;
+      this._editBackup=null;
+      this._contentEl.classList.remove('is-editing');
+      var bar=document.getElementById('portfolioEditBar');
+      if(bar){bar.children[0].style.display='';bar.children[1].style.display='none';bar.children[2].style.display='none';}
+    },
+
+    _cancelEditMode:function(){
+      // Restore from backup
+      if(this._editBackup){
+        this._detailEl.innerHTML=this._editBackup.innerHTML;
+        this._slides=this._editBackup.slides;
+        this._currentSlide=this._editBackup.currentSlide;
+        this._renderSlideViewer(this._currentSlide);
+        this._renderSlideStrip(this._currentSlide);
+        this._editBackup=null;
+      }
+      var fields=this._detailEl.querySelectorAll('[contenteditable]');
+      fields.forEach(function(f){f.contentEditable='false';});
+      this._editMode=false;
+      this._contentEl.classList.remove('is-editing');
+      var bar=document.getElementById('portfolioEditBar');
+      if(bar){bar.children[0].style.display='';bar.children[1].style.display='none';bar.children[2].style.display='none';}
+      this._bindSlideEditEvents();
+    },
+
+    _bindSlideEditEvents:function(){
+      var self=this;
+      var viewer=document.getElementById('portfolioSlideViewer');
+      if(viewer){
+        viewer.onclick=function(){
+          if(self._editMode)self._uploadToSlide(self._currentSlide);
+        };
+      }
+      var thumbs=document.querySelectorAll('.portfolio__slide-thumb');
+      thumbs.forEach(function(thumb,i){
+        thumb.onclick=function(e){
+          if(self._editMode){self._uploadToSlide(i);}
+          else{self._switchSlide(i);}
+        };
+      });
+    },
+
+    _uploadToSlide:function(slideIdx){
+      var self=this;
+      var input=document.createElement('input');
+      input.type='file';input.accept='image/*';
+      input.onchange=function(e){
+        var file=e.target.files[0];
+        if(!file)return;
+        var reader=new FileReader();
+        reader.onload=function(ev){
+          self._slides[slideIdx]={type:'image',src:ev.target.result};
+          self._renderSlideViewer(slideIdx);
+          self._renderSlideStrip(self._currentSlide);
+          self._bindSlideEditEvents();
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    },
+
     _closeContent:function(){
+      if(this._editMode)this._cancelEditMode();
       this._mode='out';
       this._contentEl.classList.remove('active');
       // Remove dynamic slide elements

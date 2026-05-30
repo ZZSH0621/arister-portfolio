@@ -80,10 +80,26 @@
 .portfolio__dot:hover,.portfolio__dot.is-active{background:var(--color-accent);transform:scale(1.4)}
 
 /* Back button (detail view) */
-.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1/-1;width:fit-content}
+.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1;width:fit-content}
 .portfolio__back svg{width:16px;height:16px}
 .portfolio__back:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
 .portfolio__content.active .portfolio__back{display:inline-flex}
+/* Edit bar */
+.portfolio__edit-bar{display:none;grid-column:2/4;grid-row:1;align-items:center;justify-content:flex-end;gap:6px}
+.portfolio__content.active .portfolio__edit-bar{display:flex}
+.portfolio__edit-bar button{padding:7px 16px;border:1px solid var(--color-border);border-radius:20px;background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.2s}
+.portfolio__edit-bar button:hover{color:var(--color-accent);border-color:var(--color-accent)}
+.portfolio__edit-bar .edit-save-btn{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+.portfolio__edit-bar .edit-save-btn:hover{opacity:0.85}
+/* Edit mode states */
+.portfolio__content.is-editing .portfolio__detail-title,
+.portfolio__content.is-editing .portfolio__detail-desc,
+.portfolio__content.is-editing .portfolio__detail-meta{outline:1px dashed var(--color-accent);outline-offset:3px;border-radius:2px;cursor:text}
+.portfolio__content.is-editing .portfolio__slide-viewer{cursor:pointer}
+.portfolio__content.is-editing .portfolio__slide-viewer:hover::after{content:'Click to change image';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);color:#fff;font-family:var(--font-mono);font-size:var(--text-sm);z-index:5;pointer-events:none}
+.portfolio__content.is-editing .portfolio__slide-blank{cursor:pointer}
+.portfolio__content.is-editing .portfolio__slide-blank:hover{background:var(--color-surface-raised);border-color:var(--color-accent)}
+.portfolio__content.is-editing .portfolio__slide-blank:hover::after{content:'+ Insert Image';color:var(--color-accent)}
 
 /* ── CONTENT VIEW (PPT slide layout) ────────── */
 .portfolio__content{display:none;position:relative;width:100%;min-height:clamp(420px,60vh,650px)}
