@@ -55,6 +55,23 @@
       this._bindEvents();
       this._showStack();
       this._rafLoop();
+      this._restoreSavedThumbnails();
+    },
+
+    _restoreSavedThumbnails:function(){
+      var self=this;
+      try{
+        var stored=JSON.parse(localStorage.getItem('portfolioEdits'));
+        if(stored){
+          for(var k in stored){
+            var edits=stored[k];
+            if(edits&&edits.thumbnail&&self._stripEls[k]){
+              var img=self._stripEls[k].querySelector('.portfolio__strip-img');
+              if(img)img.src=edits.thumbnail;
+            }
+          }
+        }
+      }catch(e){}
     },
 
     // ─── Render compressed strips ──────────────────
@@ -307,8 +324,21 @@
 
       // Load saved edits from localStorage (survives page refresh)
       try{var ls=JSON.parse(localStorage.getItem('portfolioEdits'));if(ls)for(var k in ls)this._projectEdits[k]=ls[k];}catch(e){}
-      // Restore saved edits or build fresh
+      // Restore saved title/desc/thumbnail to project data
       var saved=this._projectEdits[idx];
+      if(saved){
+        if(saved.title){for(var tk in saved.title)p.title[tk]=saved.title[tk];}
+        if(saved.description){for(var dk in saved.description)p.description[dk]=saved.description[dk];}
+        if(saved.thumbnail){p.thumbnail=saved.thumbnail;}
+        if(saved.images){p.images=saved.images.slice();}
+        // Update strip thumbnail
+        if(saved.thumbnail&&this._stripEls[idx]){
+          var stripImg=this._stripEls[idx].querySelector('.portfolio__strip-img');
+          if(stripImg)stripImg.src=saved.thumbnail;
+        }
+      }
+      // Restore saved edits or build fresh
+      saved=this._projectEdits[idx];
       if(saved&&saved.detailHTML){
         this._detailEl.innerHTML=saved.detailHTML;
         this._savedDetailHTML=saved.detailHTML;
@@ -448,7 +478,11 @@
       this._projectEdits[this._currentIdx]={
         detailHTML:this._detailEl.innerHTML,
         slides:this._slides.map(function(s){return Object.assign({},s);}),
-        currentSlide:this._currentSlide
+        currentSlide:this._currentSlide,
+        title:Object.assign({},p.title),
+        description:Object.assign({},p.description),
+        thumbnail:p.thumbnail,
+        images:p.images.slice()
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
       // Sync edited text → project data (so focus overlay picks it up)
