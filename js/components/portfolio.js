@@ -75,9 +75,9 @@
         this._projectEdits[i]=edits;
         found.push(i);
       }
-      // Diagnostic: show if edits were found
-      var el=document.getElementById('portfolioEditBar');
-      if(el&&found.length)el.setAttribute('data-edits',found.join(','));
+      // Diagnostic: if edits found for project 4, update title to confirm
+      var rb=localStorage.getItem('pe_4');
+      if(rb){document.title='E:'+JSON.parse(rb).title.en.substring(0,20);}
     },
 
     _restoreSavedThumbnails:function(){
