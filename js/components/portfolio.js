@@ -305,6 +305,8 @@
       var lang=i18n.lang();
       var self=this;
 
+      // Load saved edits from localStorage (survives page refresh)
+      try{var ls=JSON.parse(localStorage.getItem('portfolioEdits'));if(ls)for(var k in ls)this._projectEdits[k]=ls[k];}catch(e){}
       // Restore saved edits or build fresh
       var saved=this._projectEdits[idx];
       if(saved&&saved.detailHTML){
@@ -479,6 +481,8 @@
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
+      // Save to localStorage (survives page refresh)
+      try{localStorage.setItem('portfolioEdits',JSON.stringify(this._projectEdits));}catch(e){}
       document.getElementById('editBtn').style.display='';
       document.getElementById('editSaveBtn').style.display='none';
       document.getElementById('editCancelBtn').style.display='none';
