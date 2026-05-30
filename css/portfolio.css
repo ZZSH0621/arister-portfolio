@@ -80,7 +80,7 @@
 .portfolio__dot:hover,.portfolio__dot.is-active{background:var(--color-accent);transform:scale(1.4)}
 
 /* Back button (detail view) */
-.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1/-1;width:fit-content}
+.portfolio__back{display:none;align-items:center;gap:var(--space-sm);padding:8px 18px 8px 14px;border:1px solid var(--color-border);border-radius:24px;background:var(--color-surface);color:var(--color-text);cursor:pointer;font-family:var(--font-mono);font-size:var(--text-xs);transition:all 0.25s ease;grid-column:1;width:fit-content}
 .portfolio__back svg{width:16px;height:16px}
 .portfolio__back:hover{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
 .portfolio__content.active .portfolio__back{display:inline-flex}

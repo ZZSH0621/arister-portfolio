@@ -433,7 +433,7 @@
       if(!bar){
         bar=document.createElement('div');
         bar.id='portfolioEditBar';
-        bar.style.cssText='grid-column:1/-1;display:flex;gap:8px;align-items:center;justify-content:flex-end';
+        bar.style.cssText='grid-column:2/4;grid-row:1;display:flex;gap:8px;align-items:center;justify-content:flex-end';
         // Edit button
         var editBtn=document.createElement('button');
         editBtn.id='portfolioEditBtn';
