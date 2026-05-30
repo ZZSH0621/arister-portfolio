@@ -454,8 +454,17 @@
       var titleEl=this._detailEl.querySelector('.portfolio__detail-title');
       var descEl=this._detailEl.querySelector('.portfolio__detail-desc');
       var lang=window.App.I18n.lang();
-      if(titleEl)p.title[lang]=titleEl.textContent.trim();
-      if(descEl)p.description[lang]=descEl.textContent.trim();
+      if(titleEl){
+        var newTitle=titleEl.textContent.trim();
+        p.title[lang]=newTitle;
+        // Also sync other language so focus overlay big-text picks it up
+        var otherLang=(lang==='en'?'zh-CN':'en');
+        p.title[otherLang]=newTitle;
+      }
+      if(descEl){
+        var newDesc=descEl.textContent.trim();
+        p.description[lang]=newDesc;
+      }
       // Sync first slide image → project cover
       if(this._slides[0]&&this._slides[0].type==='image'){
         p.thumbnail=this._slides[0].src;
