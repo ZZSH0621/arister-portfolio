@@ -75,9 +75,6 @@
         this._projectEdits[i]=edits;
         found.push(i);
       }
-      // Diagnostic: if edits found for project 4, update title to confirm
-      var rb=localStorage.getItem('pe_4');
-      if(rb){document.title='E:'+JSON.parse(rb).title.en.substring(0,20);}
     },
 
     _restoreSavedThumbnails:function(){
