@@ -65,7 +65,17 @@
         if(stored){
           for(var k in stored){
             var edits=stored[k];
-            if(edits&&edits.thumbnail&&self._stripEls[k]){
+            var p=self._projects[k];
+            if(!edits||!p)continue;
+            // Restore title
+            if(edits.title){for(var tk in edits.title)p.title[tk]=edits.title[tk];}
+            // Restore description
+            if(edits.description){for(var dk in edits.description)p.description[dk]=edits.description[dk];}
+            // Restore thumbnail and images
+            if(edits.thumbnail){p.thumbnail=edits.thumbnail;}
+            if(edits.images){p.images=edits.images.slice();}
+            // Update strip thumbnail DOM
+            if(edits.thumbnail&&self._stripEls[k]){
               var img=self._stripEls[k].querySelector('.portfolio__strip-img');
               if(img)img.src=edits.thumbnail;
             }
