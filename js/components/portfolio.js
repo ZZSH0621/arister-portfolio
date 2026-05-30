@@ -62,19 +62,17 @@
 
     _loadEditsFromStorage:function(){
       try{
-        var stored=JSON.parse(localStorage.getItem('portfolioEdits'));
-        if(!stored)return;
-        for(var k in stored){
-          var edits=stored[k];
-          var p=this._projects[k];
+        for(var i=0;i<this._projects.length;i++){
+          var raw=localStorage.getItem('pe_'+i);
+          if(!raw)continue;
+          var edits=JSON.parse(raw);
+          var p=this._projects[i];
           if(!edits||!p)continue;
-          // Restore to source data — this is what focus overlay reads
           if(edits.title){for(var tk in edits.title)p.title[tk]=edits.title[tk];}
           if(edits.description){for(var dk in edits.description)p.description[dk]=edits.description[dk];}
           if(edits.thumbnail){p.thumbnail=edits.thumbnail;}
           if(edits.images){p.images=edits.images.slice();}
-          // Also load into in-memory cache
-          this._projectEdits[k]=edits;
+          this._projectEdits[i]=edits;
         }
       }catch(e){}
     },
@@ -109,11 +107,7 @@
         this._stripTargets.push(baseX);
         this._arcCurrents.push(0);
         var thumbSrc=p.thumbnail;
-        // Direct localStorage check — bypass everything
-        try{
-          var ls=JSON.parse(localStorage.getItem('portfolioEdits'));
-          if(ls&&ls[i]&&ls[i].thumbnail)thumbSrc=ls[i].thumbnail;
-        }catch(e){}
+        try{var raw=localStorage.getItem('pe_'+i);if(raw){var ed=JSON.parse(raw);if(ed.thumbnail)thumbSrc=ed.thumbnail;}}catch(e){}
         html+='<div class="portfolio__strip" data-strip-idx="'+i+'" style="width:'+stripW+'px">'+
           '<div class="portfolio__strip-inner">'+
             '<img src="'+thumbSrc+'" alt="'+p.title[lang]+'" class="portfolio__strip-img" loading="'+(i<6?'eager':'lazy')+'">'+
@@ -277,10 +271,7 @@
         this._focusOverlay.style.width='100%';
         // Use saved title from localStorage if available
         var enTitle=p.title['en'];
-        try{
-          var ls=JSON.parse(localStorage.getItem('portfolioEdits'));
-          if(ls&&ls[idx]&&ls[idx].title&&ls[idx].title['en'])enTitle=ls[idx].title['en'];
-        }catch(e){}
+        try{var raw=localStorage.getItem('pe_'+idx);if(raw){var ed=JSON.parse(raw);if(ed.title&&ed.title['en'])enTitle=ed.title['en'];}}catch(e){}
         var enName=enTitle.replace(/\(.*?\)/g,'').trim();
         var words=enName.split(/\s+/);
         var seeded=idx*137+1;
@@ -343,8 +334,8 @@
       var lang=i18n.lang();
       var self=this;
 
-      // Load saved edits from localStorage (survives page refresh)
-      try{var ls=JSON.parse(localStorage.getItem('portfolioEdits'));if(ls)for(var k in ls)this._projectEdits[k]=ls[k];}catch(e){}
+      // Load saved edits from localStorage
+      try{var raw=localStorage.getItem('pe_'+idx);if(raw){var ed=JSON.parse(raw);this._projectEdits[idx]=ed;}}catch(e){}
       // Restore saved title/desc/thumbnail to project data
       var saved=this._projectEdits[idx];
       if(saved){
@@ -536,8 +527,8 @@
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
-      // Save to localStorage (survives page refresh)
-      try{localStorage.setItem('portfolioEdits',JSON.stringify(this._projectEdits));}catch(e){}
+      // Save per-project key — smaller, avoids quota issues
+      try{localStorage.setItem('pe_'+this._currentIdx,JSON.stringify(this._projectEdits[this._currentIdx]));}catch(e){}
       document.getElementById('editBtn').style.display='';
       document.getElementById('editSaveBtn').style.display='none';
       document.getElementById('editCancelBtn').style.display='none';
