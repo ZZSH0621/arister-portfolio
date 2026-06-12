@@ -440,9 +440,9 @@
         this._detailEl.innerHTML=this._savedDetailHTML||'';
       }else{
         this._detailEl.innerHTML=
-          '<h3 class="portfolio__detail-title" style="color:var(--color-text-muted)">Slide '+(slideIdx+1)+'</h3>'+
+          '<h3 class="portfolio__detail-title">Slide '+(slideIdx+1)+'</h3>'+
           '<p class="portfolio__detail-meta">—</p>'+
-          '<p class="portfolio__detail-desc" style="color:var(--color-text-muted)">待编辑内容</p>';
+          '<p class="portfolio__detail-desc">待编辑内容</p>';
       }
       var self=this;
       var thumbs=App.Utils.qsa('.portfolio__slide-thumb',this._contentEl);
@@ -486,6 +486,30 @@
       var fields=this._detailEl.querySelectorAll('[contenteditable]');
       fields.forEach(function(f){f.contentEditable='false';});
       var p=this._projects[this._currentIdx];
+      var lang=window.App.I18n.lang();
+      // Sync data BEFORE saving to _projectEdits
+      if(this._currentSlide===0){
+        var titleEl=this._detailEl.querySelector('.portfolio__detail-title');
+        var descEl=this._detailEl.querySelector('.portfolio__detail-desc');
+        if(titleEl){
+          var newTitle=titleEl.textContent.trim();
+          p.title[lang]=newTitle;
+          p.title[(lang==='en'?'zh-CN':'en')]=newTitle;
+        }
+        if(descEl){
+          p.description[lang]=descEl.textContent.trim();
+        }
+      }
+      if(this._slides[0]&&this._slides[0].type==='image'){
+        p.thumbnail=this._slides[0].src;
+        p.images[0]=this._slides[0].src;
+        var stripEl=this._stripEls[this._currentIdx];
+        if(stripEl){
+          var img=stripEl.querySelector('.portfolio__strip-img');
+          if(img)img.src=this._slides[0].src;
+        }
+      }
+      // Now save (p.title/p.thumbnail are already updated)
       this._projectEdits[this._currentIdx]={
         detailHTML:this._detailEl.innerHTML,
         slides:this._slides.map(function(s){return Object.assign({},s);}),
@@ -496,32 +520,6 @@
         images:p.images.slice()
       };
       this._savedDetailHTML=this._detailEl.innerHTML;
-      // Sync edited text → project data
-      var titleEl=this._detailEl.querySelector('.portfolio__detail-title');
-      var descEl=this._detailEl.querySelector('.portfolio__detail-desc');
-      var lang=window.App.I18n.lang();
-      if(titleEl){
-        var newTitle=titleEl.textContent.trim();
-        p.title[lang]=newTitle;
-        // Also sync other language so focus overlay big-text picks it up
-        var otherLang=(lang==='en'?'zh-CN':'en');
-        p.title[otherLang]=newTitle;
-      }
-      if(descEl){
-        var newDesc=descEl.textContent.trim();
-        p.description[lang]=newDesc;
-      }
-      // Sync first slide image → project cover
-      if(this._slides[0]&&this._slides[0].type==='image'){
-        p.thumbnail=this._slides[0].src;
-        p.images[0]=this._slides[0].src;
-        // Update just the strip thumbnail
-        var stripEl=this._stripEls[this._currentIdx];
-        if(stripEl){
-          var img=stripEl.querySelector('.portfolio__strip-img');
-          if(img)img.src=this._slides[0].src;
-        }
-      }
       this._editMode=false;
       this._editBackup=null;
       this._contentEl.classList.remove('is-editing');
@@ -578,8 +576,9 @@
         var reader=new FileReader();
         reader.onload=function(ev){
           self._slides[slideIdx]={type:'image',src:ev.target.result};
+          self._currentSlide=slideIdx;
           self._renderSlideViewer(slideIdx);
-          self._renderSlideStrip(self._currentSlide);
+          self._renderSlideStrip(slideIdx);
           self._bindSlideEditEvents();
         };
         reader.readAsDataURL(file);
