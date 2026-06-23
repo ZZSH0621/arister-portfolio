@@ -1,7 +1,9 @@
 name: Deploy to Netlify
+
+# Netlify deploys are intentionally manual to avoid accidental usage/cost.
 on:
-  push:
-    branches: [master]
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
