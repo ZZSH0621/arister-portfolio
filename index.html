@@ -59,10 +59,25 @@
   </div>
 </header>
 
+<button class="hero__pull" id="heroPull" type="button" aria-label="向下拉动绳子切换到视频">
+  <span class="hero__pull-hint">向下拉</span>
+  <span class="hero__rope" aria-hidden="true"></span>
+  <span class="hero__pull-handle" aria-hidden="true"></span>
+</button>
+
 <main class="page">
 
   <!-- Hero -->
   <section id="hero" data-theme-color="#ff5e2c">
+    <div class="hero__video-stage" id="heroVideoStage" aria-hidden="true">
+      <video id="heroVideo" class="hero__video" preload="none" playsinline>
+        <source src="72s修复版.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="letter-glitch" id="letterGlitch" aria-hidden="true">
+      <canvas class="letter-glitch__canvas"></canvas>
+      <div class="letter-glitch__center-vignette"></div>
+    </div>
     <div class="hero__inner">
       <div class="hero__content">
         <p class="hero__greeting" data-i18n="hero.greeting">你好，我是</p>
@@ -77,6 +92,7 @@
         </div>
       </div>
       <div class="hero__visual" id="heroVisual">
+        <img class="hero__fallback" src="hero-photo.png" alt="" aria-hidden="true">
         <canvas id="heroCanvas"></canvas>
       </div>
       <div class="hero__scroll">
@@ -84,10 +100,13 @@
         <div class="hero__scroll-line"></div>
       </div>
     </div>
+
   </section>
 
   <!-- About -->
   <section id="about" data-theme-color="#4d7cff">
+    <div class="floating-lines" id="floatingLines" aria-hidden="true"></div>
+    <canvas class="ink-ripples" id="inkRipples" aria-hidden="true"></canvas>
     <div class="section-inner">
       <div class="grid-2">
         <div class="about__sticky">
@@ -307,14 +326,19 @@
 </footer>
 
 <!-- Three.js for WebGL effects -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+<script src="js/vendor/three.min.js">
+</script>
+<script src="hero-photo-data.js">
 </script>
 
 <script src="js/core/utils.js"></script>
 <script src="js/core/i18n.js"></script>
 <script src="js/core/theme.js"></script>
 <script src="js/components/navigation.js"></script>
+<script src="js/components/letter-glitch.js"></script>
 <script src="js/components/hero.js"></script>
+<script src="js/components/floating-lines.js"></script>
+<script src="js/components/ink-ripples.js"></script>
 <script src="js/components/about.js"></script>
 <script src="js/components/portfolio.js"></script>
 <script src="js/components/cursor.js"></script>

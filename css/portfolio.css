@@ -1,8 +1,10 @@
+@font-face{font-family:'Portfolio Display';src:url('../assets/fonts/BebasNeue-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+
 /* ============================================
-   Portfolio — Compressed-strip stack + wave drag + click-to-expand
+   Portfolio — Single-loop inertial strip gallery + click-to-expand
    Source-inspired from aristidebenoist.com
    Each project = narrow vertical strip (image compressed from sides)
-   Drag = wave/ripple physics across all strips
+   Drag = inertial horizontal movement with cursor-local bend
    ============================================ */
 
 /* Section header */
@@ -12,30 +14,26 @@
 .portfolio__separator,.portfolio__total{color:var(--color-text-muted)}
 
 /* ── STRIP STACK VIEW ─────────────────────── */
-.portfolio__stage{position:relative;width:100%;height:clamp(420px,60vh,700px);overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;perspective:650px}
+.portfolio__stage{position:relative;width:100%;height:clamp(420px,60vh,700px);overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none}
 .portfolio__stage:active{cursor:grabbing}
 
 /* Track: contains all absolutely-positioned strips */
-.portfolio__track{position:absolute;top:0;left:0;height:100%;pointer-events:none;transform-style:preserve-3d}
+.portfolio__track{position:absolute;top:0;left:0;height:100%;pointer-events:none}
 .portfolio__track>*{pointer-events:auto}
 
 /* Each compressed strip */
-.portfolio__strip{position:absolute;top:0;height:100%;cursor:pointer;transition:filter 0.4s ease;will-change:transform}
+.portfolio__strip{position:absolute;cursor:pointer;will-change:transform}
 .portfolio__strip-inner{position:relative;width:100%;height:100%;overflow:hidden}
-.portfolio__strip-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:grayscale(0.3);transition:filter 0.5s ease,transform 0.5s ease}
-.portfolio__strip:hover .portfolio__strip-img,
-.portfolio__strip.is-hovered .portfolio__strip-img{filter:grayscale(0);transform:scale(1.03)}
+.portfolio__strip-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 
 /* Strip number overlay */
 .portfolio__strip-number{position:absolute;bottom:var(--space-md);left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:var(--text-sm);color:#fff;background:rgba(0,0,0,0.6);padding:2px 10px;border-radius:3px;pointer-events:none;z-index:2;opacity:0;transition:opacity 0.3s ease;white-space:nowrap}
 .portfolio__strip:hover .portfolio__strip-number,
 .portfolio__strip.is-hovered .portfolio__strip-number{opacity:1}
 
-/* Active strip (closest to center) */
-.portfolio__strip.is-active .portfolio__strip-img{filter:grayscale(0)}
 
 /* ── FOCUS STATE (clicked strip expands, neighbors greyed) ── */
-.portfolio__strip.is-focused{width:clamp(460px,75vw,960px) !important;z-index:10 !important;transition:width 0.45s cubic-bezier(0.16,1,0.3,1),transform 0.45s cubic-bezier(0.16,1,0.3,1)}
+.portfolio__strip.is-focused{width:clamp(560px,84vw,1054px) !important;z-index:10 !important;transition:width 0.45s cubic-bezier(0.16,1,0.3,1),transform 0.45s cubic-bezier(0.16,1,0.3,1)}
 .portfolio__strip.is-focused .portfolio__strip-img{filter:grayscale(0)}
 .portfolio__strip.is-focused .portfolio__strip-number{opacity:0}
 
@@ -154,3 +152,34 @@
   .portfolio__strip:not(.is-focused){width:80px !important}
   .portfolio__strip-number{font-size:var(--text-xs);padding:1px 6px}
 }
+
+/* Clean single-loop gallery interaction */
+.portfolio__strip{top:50%;height:min(370px,72%);translate:0 -50%;transition:width .78s cubic-bezier(.16,1,.3,1),height .78s cubic-bezier(.16,1,.3,1),opacity .4s ease;will-change:transform}
+.portfolio__strip-inner{transform:translateY(var(--portfolio-lift,0)) scaleY(var(--portfolio-grow,1)) rotateY(var(--portfolio-tilt,0));transform-origin:center;will-change:transform}
+.portfolio__strip .portfolio__strip-img{filter:grayscale(var(--portfolio-gray,.68)) brightness(var(--portfolio-bright,.72)) saturate(var(--portfolio-sat,.76))!important;transform:translateY(var(--portfolio-pan,0)) scale(var(--portfolio-image-scale,1.02))!important;transition:none;will-change:filter,transform}
+.portfolio__strip.is-bending{z-index:4}
+.portfolio__strip.is-focused{top:50%;height:min(602px,100%);translate:0 -50%;transition:width .78s cubic-bezier(.16,1,.3,1),height .78s cubic-bezier(.16,1,.3,1),opacity .4s ease}
+.portfolio__strip.is-focused .portfolio__strip-inner{transform:none}
+.portfolio__strip.is-focused .portfolio__strip-img{filter:grayscale(0) brightness(1) saturate(1)!important;transform:scale(1)!important}
+.portfolio__strip.is-neighbor--left .portfolio__strip-img,.portfolio__strip.is-neighbor--right .portfolio__strip-img{filter:grayscale(1) brightness(.45)!important;transform:scale(1)!important}
+@media(max-width:768px){.portfolio__strip{top:50%;height:100%;translate:0 -50%}.portfolio__strip-inner{transform:none}.portfolio__strip .portfolio__strip-img{filter:grayscale(.25) brightness(.9)!important;transform:scale(1.02)!important}.portfolio__strip.is-focused{top:0;height:100%;translate:none}}
+
+/* Refined focus typography */
+.portfolio__strip.is-focused{top:50%;height:min(100%,602px);translate:0 -50%}
+.portfolio__focus-overlay{justify-content:space-between;text-align:left;padding:clamp(24px,4vw,56px);background:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.04) 38%,rgba(0,0,0,.5));overflow:visible}
+.portfolio__focus-meta{width:100%;display:flex;justify-content:space-between;gap:24px;font-family:var(--font-mono);font-size:var(--text-xs);font-weight:400;color:rgba(255,255,255,.82);text-transform:uppercase;position:relative;z-index:3}
+.portfolio__focus-title{width:calc(100% + clamp(80px,10vw,190px));height:clamp(230px,48vh,470px);margin-inline:calc(clamp(40px,5vw,95px)*-1);mix-blend-mode:difference;position:relative;z-index:2;overflow:visible}
+.portfolio__focus-line{position:absolute;left:0;right:0;height:calc(100%/var(--focus-lines,1));top:calc(var(--line-i,0)*(100%/var(--focus-lines,1)));overflow:visible}
+.portfolio__focus-letter{position:absolute;left:var(--letter-x);top:50%;display:block;overflow:visible;line-height:1;transform:translate(-50%,-50%)}
+.portfolio__focus-letter>span{display:block;color:#fff!important;font-family:'Portfolio Display',var(--font-display);font-size:clamp(7rem,18vw,16rem);font-weight:400;line-height:.82;letter-spacing:-.015em;text-transform:uppercase;white-space:nowrap;text-shadow:none;transform:translateX(var(--char-from,-118%));animation:portfolioFocusWordIn 1.15s cubic-bezier(.16,1,.3,1) forwards;animation-delay:calc(90ms + var(--line-i,0)*120ms + var(--char-i,0)*42ms)}.portfolio__focus-word{display:inline-flex;overflow:visible;padding:.12em 0 .08em;line-height:1}
+.portfolio__focus-char{display:block;color:#fff!important;font-family:'Portfolio Display',var(--font-display);font-size:clamp(7rem,18vw,16rem);font-weight:400;line-height:.82;letter-spacing:-.015em;text-transform:uppercase;white-space:nowrap;text-shadow:none;transform:translateX(-106%);animation:portfolioFocusWordIn 1.05s cubic-bezier(.16,1,.3,1) forwards;animation-delay:calc(90ms + var(--word-i)*90ms)}
+.portfolio__focus-word:nth-child(even) .portfolio__focus-char{transform:translateX(106%)}
+@keyframes portfolioFocusWordIn{to{transform:translateX(0)}}
+.portfolio__focus-footer{width:100%;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;position:relative;z-index:3}
+.portfolio__focus-zh{font-family:var(--font-sans);font-size:var(--text-sm);font-weight:400;color:rgba(255,255,255,.78);margin:0;letter-spacing:0;text-shadow:none}
+.portfolio__focus-cta{display:inline-flex;align-items:center;gap:10px;margin:0;padding:0 0 5px;border:0;border-bottom:1px solid rgba(255,255,255,.62);border-radius:0;background:none;backdrop-filter:none;color:#fff;font-family:var(--font-mono);font-size:var(--text-xs);text-transform:uppercase;transition:border-color .25s,color .25s}
+.portfolio__focus-cta b{font-size:1.25em;font-weight:400;color:var(--focus-accent)}
+.portfolio__focus-cta:hover{background:none;color:var(--focus-accent);border-color:var(--focus-accent);transform:none}
+.portfolio__strip.is-focused .portfolio__strip-inner{animation:portfolioFocusImageIn 1.1s cubic-bezier(.16,1,.3,1) both}
+@keyframes portfolioFocusImageIn{from{transform:scale(1.065)}to{transform:scale(1)}}
+@media(max-width:768px){.portfolio__strip.is-focused{top:0;height:100%;translate:none}.portfolio__focus-overlay{padding:22px 18px}.portfolio__focus-title{margin-inline:-8vw;width:116%;height:clamp(160px,34vh,280px)}.portfolio__focus-letter>span,.portfolio__focus-char{font-size:clamp(5rem,25vw,8.5rem)}.portfolio__focus-meta span:last-child{display:none}.portfolio__focus-footer{align-items:center}.portfolio__focus-zh{max-width:55%}}

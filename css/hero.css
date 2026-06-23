@@ -1,6 +1,10 @@
 /* Hero */
 #hero{height:100dvh;display:flex;align-items:center;padding-top:var(--nav-height);position:relative;overflow:hidden}
-.hero__inner{width:100%;max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl);align-items:center;padding:0 var(--space-xl)}
+.letter-glitch{position:absolute;inset:0;z-index:1;overflow:hidden;background:#000;pointer-events:none}
+.letter-glitch__canvas{display:block;width:100%;height:100%;opacity:0.52}
+.letter-glitch__center-vignette{position:absolute;inset:0;background:radial-gradient(circle,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0) 62%);pointer-events:none}
+.hero__scroll{z-index:2}
+.hero__inner{position:relative;z-index:2;width:100%;max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl);align-items:center;padding:0 var(--space-xl)}
 .hero__content{position:relative;z-index:2}
 .hero__greeting{font-family:var(--font-mono);font-size:var(--text-sm);color:var(--color-accent);text-transform:uppercase;letter-spacing:0.2em;margin-bottom:var(--space-md)}
 .hero__name{font-size:var(--text-4xl);line-height:0.85;margin-bottom:var(--space-lg);overflow:hidden}
@@ -10,11 +14,31 @@
 .hero__tagline{font-size:var(--text-base);color:var(--color-text-muted);max-width:40ch;margin-bottom:var(--space-xl);line-height:1.7}
 .hero__cta{display:flex;gap:var(--space-md);flex-wrap:wrap}
 .hero__visual{position:relative;width:100%;height:100%;min-height:400px}
-.hero__visual canvas{width:100%;height:100%;border-radius:8px}
+.hero__fallback,.hero__visual canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:8px}
+.hero__fallback{object-fit:cover}
+.hero__visual canvas{opacity:0;transition:opacity 180ms ease}
+.hero__visual canvas.is-ready{opacity:1}
 .hero__scroll{position:absolute;bottom:var(--space-xl);right:var(--space-xl);display:flex;align-items:center;gap:var(--space-sm);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.1em;writing-mode:vertical-rl}
 .hero__scroll-line{width:1px;height:40px;background:var(--color-text-muted);animation:scrollPulse 2s ease-in-out infinite}
 @keyframes scrollPulse{0%,100%{opacity:0.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.3)}}
 
+/* The film sits behind the opening screen; pulling the cord reveals it. */
+.hero__video-stage{position:absolute;inset:0;z-index:0;background:#000;pointer-events:none}
+.hero__video{display:block;width:100%;height:100%;object-fit:cover}
+.hero__pull{--pull-distance:0px;--rope-length:clamp(320px,58vh,620px);position:fixed;z-index:600;top:0;right:max(var(--space-xl),calc((100vw - var(--max-width))/2));width:48px;height:calc(var(--rope-length) + 120px);padding:0;border:0;background:none;color:#fff;cursor:grab;touch-action:none;user-select:none;pointer-events:none;opacity:1;visibility:visible;transition:opacity .3s ease,visibility 0s}
+.hero__pull:active,.hero__pull.is-dragging{cursor:grabbing}
+.hero__pull.is-hidden{opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s .3s}
+.hero__pull-hint{position:absolute;left:50%;top:calc(var(--rope-length) - 42px);transform:translateX(-50%);font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;white-space:nowrap;text-transform:uppercase;color:rgba(255,255,255,.72);transition:opacity .2s ease}
+.hero__rope{position:absolute;left:50%;top:0;width:2px;height:calc(var(--rope-length) + var(--pull-distance));background:linear-gradient(#d9c49a,#8d6c3e);border-radius:2px;transform:translateX(-50%);transform-origin:top;box-shadow:1px 0 rgba(255,255,255,.22)}
+.hero__pull-handle{position:absolute;left:50%;top:calc(var(--rope-length) - 10px);width:32px;height:20px;border:3px solid #d6aa65;border-radius:50%;background:#241b14;pointer-events:auto;cursor:grab;transform:translate(-50%,var(--pull-distance));box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 4px 10px rgba(0,0,0,.35)}
+.hero__pull:not(.is-dragging) .hero__rope{transition:height .55s var(--ease-out-expo)}
+.hero__pull:not(.is-dragging) .hero__pull-handle{transition:transform .55s var(--ease-out-expo)}
+.hero__pull.is-dragging .hero__pull-hint{opacity:.25}
+.hero__pull.is-dragging .hero__pull-handle{cursor:grabbing}
+.hero__pull:focus-visible{outline:1px solid var(--color-accent);outline-offset:-4px}
+#hero .hero__inner,#hero .letter-glitch{transition:opacity .55s var(--ease-out-expo),transform .75s var(--ease-out-expo)}
+#hero.is-video-active .hero__inner,#hero.is-video-active .letter-glitch{opacity:0;pointer-events:none;transform:translateY(-3vh)}
+#hero.is-video-active .hero__video-stage{pointer-events:auto}
 .btn{padding:12px 28px;border-radius:30px;font-size:var(--text-sm);font-weight:500;display:inline-flex;align-items:center;gap:var(--space-sm);transition:all var(--duration-normal) var(--ease-out-expo);cursor:pointer}
 .btn--primary{background:var(--color-accent);color:#fff}
 .btn--primary:hover{background:#ff7a52;transform:translateY(-2px);box-shadow:0 8px 30px var(--color-accent-glow)}
@@ -27,4 +51,9 @@
   .hero__tagline{margin-inline:auto}
   .hero__cta{justify-content:center}
   .hero__scroll{display:none}
+  .hero__pull{--rope-length:clamp(260px,50vh,420px);right:calc(var(--space-xl) + 48px)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hero__pull:not(.is-dragging) .hero__rope,.hero__pull:not(.is-dragging) .hero__pull-handle,#hero .hero__inner,#hero .letter-glitch{transition-duration:.01ms}
 }

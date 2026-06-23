@@ -12,7 +12,10 @@
 
     // 2. UI components
     if(App.Navigation)App.Navigation.init();
+    if(App.LetterGlitch)App.LetterGlitch.init({glitchSpeed:50,smooth:true});
     if(App.Hero)App.Hero.init();
+    if(App.FloatingLines)App.FloatingLines.init({lineCount:[8,8,8],lineDistance:[8,6,4],bendRadius:5,bendStrength:-0.5,colors:['#0061ff','#444343','#c40000']});
+    if(App.InkRipples)App.InkRipples.init({colors:['#356dff','#dce5ff']});
     if(App.About)App.About.init();
     if(App.Cursor)App.Cursor.init();
     if(App.Animations)App.Animations.init();

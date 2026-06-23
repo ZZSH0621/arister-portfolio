@@ -1,3 +1,10 @@
+/* FloatingLines background */
+#about{background:#000;overflow:hidden;isolation:isolate}
+#about>.section-inner{position:relative;z-index:2}
+.floating-lines{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.ink-ripples{position:absolute;inset:0;z-index:1;width:100%;height:100%;pointer-events:none;opacity:0.9}
+.floating-lines canvas{display:block;width:100%;height:100%;opacity:0.86;mix-blend-mode:screen}
+.floating-lines::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.46),rgba(0,0,0,0.12) 48%,rgba(0,0,0,0.3));pointer-events:none}
 /* About */
 .about__sticky{position:sticky;top:calc(var(--nav-height) + var(--space-xl))}
 .about__bio p{color:var(--color-text-secondary);font-size:var(--text-base);line-height:1.8;margin-bottom:var(--space-md)}
@@ -29,3 +36,5 @@
 .skills__tags{display:flex;flex-wrap:wrap;gap:var(--space-sm)}
 .skill-tag{padding:6px 14px;border:1px solid var(--color-border);border-radius:20px;font-size:var(--text-xs);color:var(--color-text-secondary);transition:all var(--duration-fast)}
 .skill-tag:hover{border-color:var(--color-accent);color:var(--color-accent)}
+
+@media(max-width:768px){.ink-ripples{opacity:0.72}}

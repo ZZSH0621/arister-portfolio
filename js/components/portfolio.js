@@ -1,5 +1,5 @@
 // js/components/portfolio.js
-// Strip-compression stack with wave-physics drag + focus expand + velocity pop
+// Single-loop inertial gallery with cursor bend + focus expand
 // Modes: "out" = strips | "focus" = one expanded with greyed neighbors | "in" = full detail
 (function(){
   'use strict';
@@ -16,20 +16,19 @@
     // Strip system
     _stripEls:[],
     _stripPositions:[],
-    _stripTargets:[],
     _stripBase:[],
     _scrollOffset:0,
+    _scrollCurrent:0,
     _stripWidth:110,
     _stripGap:6,
-    _arcCurrents:[],          // per-strip rotateY (lerped toward target)
-    _arcTarget:0,             // global arc intensity 0=flat 1=3D cylindrical
+    _bendCurrents:[],
+    _pointerX:0,_pointerY:0,_pointerActive:false,
 
     // Drag physics
     _isDown:false,_isDragging:false,
     _dragStartX:0,_dragStartOffset:0,
     _lastMouseX:0,
     _velocity:0,
-    _speedMag:0,              // smoothed speed magnitude for pop effect
     _lastScrollTime:0,
 
     init:function(projects){
@@ -94,8 +93,8 @@
       var stageW=this._stageEl.offsetWidth||window.innerWidth;
       var startX=(stageW-totalW)/2;
 
-      this._stripBase=[];this._stripPositions=[];this._stripTargets=[];this._stripEls=[];
-      this._arcCurrents=[];this._arcTarget=0;
+      this._stripBase=[];this._stripPositions=[];this._stripEls=[];
+      this._bendCurrents=[];this._scrollCurrent=0;
       this._scrollOffset=0;
 
       var html='';
@@ -104,8 +103,7 @@
         var baseX=startX+i*step;
         this._stripBase.push(baseX);
         this._stripPositions.push(baseX);
-        this._stripTargets.push(baseX);
-        this._arcCurrents.push(0);
+        this._bendCurrents.push(0);
         var r=localStorage.getItem('pe_'+i);var ed=r?JSON.parse(r):null;var thumbSrc=(ed&&ed.thumbnail)?ed.thumbnail:p.thumbnail;
         html+='<div class="portfolio__strip" data-strip-idx="'+i+'" style="width:'+stripW+'px">'+
           '<div class="portfolio__strip-inner">'+
@@ -194,7 +192,6 @@
       var startX=(stageW-totalW)/2;
       for(var i=0;i<total;i++){
         this._stripBase[i]=startX+i*step;
-        this._stripTargets[i]=this._stripBase[i]+this._scrollOffset;
       }
       this._trackEl.style.width=totalW+'px';
       this._centerStrip(this._currentIdx);
@@ -205,9 +202,6 @@
       var stripCenter=this._stripBase[idx]+this._stripWidth/2;
       var viewCenter=stageW/2;
       this._scrollOffset=viewCenter-stripCenter;
-      for(var i=0;i<this._stripTargets.length;i++){
-        this._stripTargets[i]=this._stripBase[i]+this._scrollOffset;
-      }
       this._currentIdx=idx;
       this._updateCounter(idx);
       this._updateDots(idx);
@@ -228,21 +222,14 @@
       var stageW=this._stageEl.offsetWidth||window.innerWidth;
 
       // Calculate expanded focused width — wider & more rectangular
-      var focusedWidth=Math.min(960,Math.max(460,stageW*0.75));
+      var focusedWidth=Math.min(1054,Math.max(560,stageW*0.84));
       var focusedLeft=(stageW-focusedWidth)/2;
-
-      // Freeze all strips, then reposition focused + neighbors
-      for(var i=0;i<this._stripTargets.length;i++){
-        this._stripTargets[i]=this._stripPositions[i];
-      }
       this._velocity=0;
-      this._speedMag=0;
 
       // Reposition: focused strip centered, neighbors compressed to slivers
       if(this._stripEls[idx]){
         this._stripEls[idx].style.width=focusedWidth+'px';
         this._stripPositions[idx]=focusedLeft;
-        this._stripTargets[idx]=focusedLeft;
         this._stripEls[idx].style.transform='translateX('+focusedLeft+'px)';
       }
       // Left neighbor: compressed sliver (~30px visible)
@@ -251,7 +238,6 @@
         var lnPos=focusedLeft-lnPeek;
         this._stripEls[idx-1].style.width=stripW+'px';
         this._stripPositions[idx-1]=lnPos;
-        this._stripTargets[idx-1]=lnPos;
         this._stripEls[idx-1].style.transform='translateX('+lnPos+'px)';
       }
       // Right neighbor: compressed sliver (~30px visible)
@@ -260,31 +246,81 @@
         var rnPos=focusedLeft+focusedWidth-(stripW-rnPeek);
         this._stripEls[idx+1].style.width=stripW+'px';
         this._stripPositions[idx+1]=rnPos;
-        this._stripTargets[idx+1]=rnPos;
         this._stripEls[idx+1].style.transform='translateX('+rnPos+'px)';
       }
 
-      // Overlay breaks out: full-stage width, letters with random spacing
+      // Focus typography: clipped word bands inspired by editorial title cards.
       if(this._focusOverlay){
         this._focusOverlay.style.left='0';
         this._focusOverlay.style.width='100%';
-        // Use saved title from localStorage if available
+        this._focusOverlay.style.setProperty('--focus-accent',p.themeColor);
         var enTitle=p.title['en'];var r=localStorage.getItem('pe_'+idx);if(r){var ed=JSON.parse(r);if(ed.title&&ed.title['en'])enTitle=ed.title['en'];}
         var enName=enTitle.replace(/\(.*?\)/g,'').trim();
-        var words=enName.split(/\s+/);
-        var seeded=idx*137+1;
-        var wordsHtml=words.map(function(w){
-          var chars=w.split('');
-          var charSpans=chars.map(function(c,i){
-            var rand=((Math.sin(seeded+i*31)+1)*0.18+0.12).toFixed(3);
-            return '<span class="portfolio__focus-char" style="color:'+p.themeColor+';margin-right:'+rand+'em">'+c+'</span>';
+        var displayName=enName.toUpperCase().replace(/[^A-Z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+        var words=displayName.split(/\s+/).filter(Boolean);
+        var safeText=function(value){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');};
+        var posterAliases={
+          4:['AI','TOOLS'],
+          5:['FITNESS','APP']
+        };
+        var posterLayouts=[
+          [[11,31,50,69,89]],
+          [[16,48,82],[7,21,36,51,66,80,93]],
+          [[7,22,37,52,67,82],[8,22,37,52,67,82,94]],
+          [[8,23,38,53,68,84],[18,39,58,75,91]],
+          [[36,64],[8,28,50,72,92]],
+          [[6,21,36,52,68,84,95],[20,40,60]]
+        ];
+        var splitTitle=function(parts){
+          if(!parts.length)return ['PROJECT'];
+          var total=parts.join('').length;
+          if(parts.length<2||total<=8)return [parts.join('')];
+          var half=total/2,lines=[[],[]],count=0;
+          parts.forEach(function(part){
+            if(count<half||!lines[0].length){lines[0].push(part);count+=part.length;}
+            else lines[1].push(part);
+          });
+          if(!lines[1].length)return [lines[0].join('')];
+          return [lines[0].join(''),lines[1].join('')];
+        };
+        var titleLines=posterAliases[idx]||splitTitle(words);
+        var seeded=function(lineIndex,charIndex){
+          var x=Math.sin((idx+1)*97+(lineIndex+1)*41+(charIndex+1)*23)*10000;
+          return x-Math.floor(x);
+        };
+        var distribute=function(count,lineIndex){
+          var preset=posterLayouts[idx]&&posterLayouts[idx][lineIndex];
+          if(preset&&preset.length===count)return preset.slice();
+          var min=count<5?14:5,max=count<5?86:95;
+          var positions=[];
+          for(var charIndex=0;charIndex<count;charIndex++){
+            var base=count===1?50:min+(max-min)*(charIndex/(count-1));
+            var jitter=(seeded(lineIndex,charIndex)-0.5)*(count<6?10:14);
+            positions.push(Math.max(3,Math.min(97,base+jitter)));
+          }
+          positions.sort(function(a,b){return a-b;});
+          for(var i=1;i<positions.length;i++)positions[i]=Math.max(positions[i],positions[i-1]+(count<7?7:5));
+          if(positions.length&&positions[positions.length-1]>97){
+            var overflow=positions[positions.length-1]-97;
+            for(var j=0;j<positions.length;j++)positions[j]-=overflow;
+          }
+          return positions;
+        };
+        var wordsHtml=titleLines.map(function(line,lineIndex){
+          var chars=line.split('');
+          var positions=distribute(chars.length,lineIndex);
+          var letters=chars.map(function(ch,charIndex){
+            var from=charIndex%2===0?-118:118;
+            return '<span class="portfolio__focus-letter" style="--letter-x:'+positions[charIndex].toFixed(2)+'%;--char-i:'+charIndex+';--char-from:'+from+'%"><span>'+safeText(ch)+'</span></span>';
           }).join('');
-          return '<div class="portfolio__focus-word">'+charSpans+'</div>';
+          return '<div class="portfolio__focus-line" style="--line-i:'+lineIndex+'">'+letters+'</div>';
         }).join('');
+        var category=p.category[lang]||p.category['en']||'';
         this._focusOverlay.innerHTML=
-          wordsHtml+
-          '<p class="portfolio__focus-zh">'+p.title['zh-CN']+'</p>'+
-          '<span class="portfolio__focus-cta" data-i18n="portfolio.viewProject">View Project →</span>';
+          '<div class="portfolio__focus-meta"><span>'+String(idx+1).padStart(2,'0')+' / '+String(this._projects.length).padStart(2,'0')+'</span><span>'+category+' · '+p.year+'</span></div>'+
+          '<div class="portfolio__focus-title" style="--focus-lines:'+titleLines.length+'">'+wordsHtml+'</div>'+
+          '<div class="portfolio__focus-footer"><p class="portfolio__focus-zh">'+safeText(p.title['zh-CN'])+'</p>'+
+          '<span class="portfolio__focus-cta">'+i18n.t('portfolio.viewProject')+' <b aria-hidden="true">↗</b></span></div>';
         this._focusOverlay.style.display='';
       }
 
@@ -313,11 +349,7 @@
         strip.classList.remove('is-focused','is-neighbor--left','is-neighbor--right','is-hidden');
         strip.style.width=stripW+'px';
       });
-      // Restore all positions from targets
-      for(var i=0;i<this._stripPositions.length;i++){
-        this._stripTargets[i]=this._stripBase[i]+this._scrollOffset;
-      }
-      this._updateDots(this._currentIdx);
+this._updateDots(this._currentIdx);
     },
 
     // ─── Mode switching (full detail → PPT slide view) ──
@@ -607,29 +639,20 @@
       this._contentEl.classList.remove('active');
     },
 
-    // ─── Wheel ─────────────────────────────────────
+    // Wheel changes one horizontal target; RAF owns all visual updates.
     _onWheel:function(e){
       var now=Date.now();
-      if(this._mode==='in'){
-        // Scroll-to-close disabled — use back button only
-        return;
-      }
+      if(this._mode==='in')return;
       if(this._mode==='focus'){
         if(now-this._lastScrollTime>400){this._exitFocus();this._lastScrollTime=now}
         e.preventDefault();
         return;
       }
-      if(this._mode==='out'){
-        e.preventDefault();
-        var delta=e.deltaY*0.8;
-        this._speedMag=Math.abs(e.deltaY)*0.5;
-        this._scrollOffset+=delta;
-        this._clampScroll();
-        for(var i=0;i<this._stripTargets.length;i++){
-          this._stripTargets[i]=this._stripBase[i]+this._scrollOffset;
-        }
-        this._updateIndexFromScroll();
-      }
+      if(this._mode!=='out')return;
+      e.preventDefault();
+      this._scrollOffset+=e.deltaY*0.72;
+      this._velocity=e.deltaY*0.045;
+      this._clampScroll();
     },
 
     _clampScroll:function(){
@@ -648,7 +671,7 @@
 
     _updateIndexFromScroll:function(){
       var stageW=this._stageEl.offsetWidth||window.innerWidth;
-      var center=stageW/2-this._scrollOffset;
+      var center=stageW/2-this._scrollCurrent;
       var closest=0,minDist=Infinity;
       for(var i=0;i<this._stripBase.length;i++){
         var mid=this._stripBase[i]+this._stripWidth/2;
@@ -662,47 +685,39 @@
       }
     },
 
-    // ─── Mouse drag with wave physics ──────────────
+    // Pointer tracking + horizontal drag
     _onMouseDown:function(e){
       if(this._mode==='focus'){
-        // Click outside expanded strip → exit focus
         var onFocused=e.target.closest('.is-focused');
         var onOverlay=e.target.closest('#portfolioFocusOverlay');
         if(!onFocused&&!onOverlay)this._exitFocus();
         return;
       }
-      if(this._mode!=='out')return;
-      if(e.target.closest('.portfolio__dot,.portfolio__arrow'))return;
+      if(this._mode!=='out'||e.target.closest('.portfolio__dot,.portfolio__arrow'))return;
       this._isDown=true;
       this._isDragging=false;
       this._dragStartX=e.clientX;
       this._dragStartOffset=this._scrollOffset;
       this._lastMouseX=e.clientX;
       this._velocity=0;
-      this._speedMag=0;
-      for(var i=0;i<this._stripTargets.length;i++){
-        this._stripTargets[i]=this._stripPositions[i];
-      }
     },
 
     _onMouseMove:function(e){
-      if(!this._isDown)return;
+      this._pointerX=e.clientX;
+      this._pointerY=e.clientY;
+      var rect=this._stageEl.getBoundingClientRect();
+      this._pointerActive=e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom;
+      if(!this._isDown||this._mode!=='out')return;
       var dx=e.clientX-this._dragStartX;
       if(Math.abs(dx)>3)this._isDragging=true;
       if(!this._isDragging)return;
-
       this._velocity=e.clientX-this._lastMouseX;
-      this._speedMag=Math.abs(this._velocity);
       this._lastMouseX=e.clientX;
-
       this._scrollOffset=this._dragStartOffset+dx;
       this._clampScroll();
-      for(var i=0;i<this._stripTargets.length;i++){
-        this._stripTargets[i]=this._stripBase[i]+this._scrollOffset;
-      }
     },
 
-    _onMouseUp:function(e){
+    _onMouseUp:function(){
       if(!this._isDown)return;
       this._isDown=false;
       this._isDragging=false;
@@ -736,79 +751,50 @@
       }
     },
 
-    // ─── RAF loop: wave physics + velocity pop ─────
+    // Single RAF: inertia, damping, pointer bend and color response.
     _rafLoop:function(){
       var self=this;
       function tick(){
-        if(self._trackEl&&(self._mode==='out'||self._mode==='focus')){
-          var total=self._stripPositions.length;
-
-          // Momentum / speed decay
-          if(!self._isDown){
-            if(Math.abs(self._velocity)>0.05){
-              self._scrollOffset+=self._velocity;
-              self._clampScroll();
-              self._velocity*=0.92;
-              for(var i=0;i<total;i++){
-                self._stripTargets[i]=self._stripBase[i]+self._scrollOffset;
-              }
-              self._updateIndexFromScroll();
-            }
-            // Decay speed magnitude for pop effect
-            self._speedMag*=0.9;
-            if(self._speedMag<0.1)self._speedMag=0;
+        if(self._trackEl&&self._mode==='out'){
+          if(!self._isDown&&Math.abs(self._velocity)>0.01){
+            self._scrollOffset+=self._velocity;
+            self._clampScroll();
+            self._velocity*=0.91;
           }
+          var scrollDamp=self._isDown?0.22:0.1;
+          self._scrollCurrent+=(self._scrollOffset-self._scrollCurrent)*scrollDamp;
+          var stageRect=self._stageEl.getBoundingClientRect();
+          var radius=Math.max(160,Math.min(240,stageRect.width*0.2));
+          var pointerInside=self._pointerActive;
 
-          // ── 3D Center-Axis Wave: fast→spread, slow→flat ──
-          var stageW=self._stageEl.offsetWidth||window.innerWidth;
-          var viewCenter=stageW/2;
-          var arcThreshold=0.5;
-          // Fast scroll → arcTarget→1 (3D wave), slow → arcTarget→0 (flat)
-          var desiredArc=Math.min(self._speedMag/arcThreshold,1);
-          self._arcTarget+=(desiredArc-self._arcTarget)*0.12;
+          for(var i=0;i<self._stripEls.length;i++){
+            var targetX=self._stripBase[i]+self._scrollCurrent;
+            self._stripPositions[i]+=(targetX-self._stripPositions[i])*0.16;
+            var strip=self._stripEls[i];
+            if(!strip)continue;
+            var center=stageRect.left+self._stripPositions[i]+self._stripWidth/2;
+            var distance=Math.abs(self._pointerX-center);
+            var influence=pointerInside?Math.max(0,1-distance/radius):0;
+            influence=influence*influence*(3-2*influence);
+            var current=self._bendCurrents[i]||0;
+            current+=(influence-current)*(influence>current?0.18:0.1);
+            self._bendCurrents[i]=current;
+            var localY=stageRect.height?Math.max(0,Math.min(1,(self._pointerY-stageRect.top)/stageRect.height)):0.5;
+            var side=Math.max(-1,Math.min(1,(center-self._pointerX)/radius));
 
-          for(var i=0;i<total;i++){
-            if(self._mode==='focus')break;
-
-            var damp;
-            if(self._isDown&&self._isDragging&&self._lastMouseX){
-              var stripScreenX=self._stripPositions[i]+(self._stageEl.getBoundingClientRect().left||0);
-              var distPx=Math.abs(stripScreenX-self._lastMouseX);
-              var maxPx=stageW||800;
-              var t=Math.min(distPx/maxPx,1);
-              damp=0.22-t*0.15;
-            }else{
-              damp=0.1;
-            }
-            self._stripPositions[i]+=(self._stripTargets[i]-self._stripPositions[i])*damp;
-
-            if(self._stripEls[i]){
-              var tx=self._stripPositions[i];
-              var stripMid=tx+self._stripWidth/2;
-
-              var nd=(stripMid-viewCenter)/stageW;
-              var absNd=Math.abs(nd);
-              var arc=self._arcTarget;
-
-              // Center-anchored wave: center=0° rotation, edges spread out
-              var targetRY=nd*arc*80;
-              var targetTZ=-absNd*arc*260;
-
-              // Center lifts forward as wave epicenter
-              var lift=-(1-absNd*2.5)*arc*22;
-              if(lift>0)lift=0;
-
-              // Wave radiates from center → edges: center responds fast, edges lag
-              var arcDamp=0.20-absNd*0.16;
-              self._arcCurrents[i]+=(targetRY-self._arcCurrents[i])*arcDamp;
-
-              self._stripEls[i].style.transform=
-                'translateX('+tx+'px) '+
-                'rotateY('+self._arcCurrents[i]+'deg) '+
-                'translateZ('+targetTZ+'px) '+
-                'translateY('+lift+'px)';
-            }
+            strip.style.setProperty('--portfolio-bend',current.toFixed(4));
+            strip.style.setProperty('--portfolio-lift',(-34*current).toFixed(2)+'px');
+            strip.style.setProperty('--portfolio-grow',(1+0.18*current).toFixed(4));
+            strip.style.setProperty('--portfolio-tilt',(side*current*4.5).toFixed(2)+'deg');
+            strip.style.setProperty('--portfolio-pan',((0.5-localY)*18*current).toFixed(2)+'px');
+            strip.style.setProperty('--portfolio-gray',(0.68*(1-current)).toFixed(4));
+            strip.style.setProperty('--portfolio-bright',(0.72+0.28*current).toFixed(4));
+            strip.style.setProperty('--portfolio-sat',(0.76+0.24*current).toFixed(4));
+            strip.style.setProperty('--portfolio-image-scale',(1.02+0.06*current).toFixed(4));
+            strip.classList.toggle('is-bending',current>0.015);
+            strip.style.transform='translate3d('+self._stripPositions[i]+'px,0,0)';
           }
+          self._updateIndexFromScroll();
         }
         requestAnimationFrame(tick);
       }
@@ -824,6 +810,7 @@
         this._stageEl.addEventListener('mousedown',function(e){self._onMouseDown(e)});
         document.addEventListener('mousemove',function(e){self._onMouseMove(e)});
         document.addEventListener('mouseup',function(e){self._onMouseUp(e)});
+        this._stageEl.addEventListener('mouseleave',function(){self._pointerActive=false});
       }
       // Detail view: scroll naturally, no wheel-to-close
 

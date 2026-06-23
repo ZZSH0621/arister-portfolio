@@ -3,12 +3,91 @@
 (function(){
   'use strict';
   const Hero={
-    _canvas:null,_scene:null,_renderer:null,_cleanup:null,
+    _canvas:null,_scene:null,_renderer:null,_cleanup:null,_pull:null,_video:null,
 
     init(){
       this._canvas=document.getElementById('heroCanvas');
-      if(!this._canvas||App.Utils.isTouch())return;
-      this._setupWebGL();
+      if(this._canvas)this._setupWebGL();
+      this._setupPullCord();
+    },
+
+    _setupPullCord(){
+      const hero=document.getElementById('hero');
+      const pull=document.getElementById('heroPull');
+      const video=document.getElementById('heroVideo');
+      const stage=document.getElementById('heroVideoStage');
+      if(!hero||!pull||!video||!stage)return;
+
+      this._pull=pull;
+      this._video=video;
+      const threshold=68;
+      const maxPull=96;
+      let startY=0;
+      let distance=0;
+      let dragging=false;
+
+      const setDistance=(value)=>{
+        distance=Math.max(0,Math.min(maxPull,value));
+        pull.style.setProperty('--pull-distance',distance+'px');
+      };
+      const toggleLayer=()=>{
+        const showVideo=!hero.classList.contains('is-video-active');
+        hero.classList.toggle('is-video-active',showVideo);
+        stage.setAttribute('aria-hidden',String(!showVideo));
+        pull.setAttribute('aria-label',showVideo?'向下拉动绳子返回首页':'向下拉动绳子切换到视频');
+
+        if(!showVideo){
+          video.pause();
+          video.currentTime=0;
+          return;
+        }
+
+        video.muted=false;
+        video.currentTime=0;
+        const playback=video.play();
+        if(playback&&typeof playback.catch==='function'){
+          playback.catch(()=>{
+            video.muted=true;
+            video.play().catch(()=>{});
+          });
+        }
+      };
+      const finish=(pointerId)=>{
+        if(!dragging)return;
+        dragging=false;
+        pull.classList.remove('is-dragging');
+        if(pointerId!==undefined&&pull.hasPointerCapture(pointerId))pull.releasePointerCapture(pointerId);
+        if(distance>=threshold)toggleLayer();
+        setDistance(0);
+      };
+
+      pull.addEventListener('pointerdown',(event)=>{
+        if(event.button!==0&&event.pointerType==='mouse')return;
+        dragging=true;
+        startY=event.clientY;
+        pull.classList.add('is-dragging');
+        pull.setPointerCapture(event.pointerId);
+      });
+      pull.addEventListener('pointermove',(event)=>{
+        if(!dragging)return;
+        setDistance(event.clientY-startY);
+      });
+      pull.addEventListener('pointerup',(event)=>finish(event.pointerId));
+      pull.addEventListener('pointercancel',(event)=>finish(event.pointerId));
+      pull.addEventListener('keydown',(event)=>{
+        if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleLayer();}
+      });
+
+      const visibilityObserver=new IntersectionObserver((entries)=>{
+        const isVisible=entries[0]&&entries[0].isIntersecting;
+        pull.classList.toggle('is-hidden',!isVisible);
+        if(!isVisible){
+          dragging=false;
+          pull.classList.remove('is-dragging');
+          setDistance(0);
+        }
+      },{threshold:0});
+      visibilityObserver.observe(hero);
     },
 
     _setupWebGL(){
@@ -25,7 +104,9 @@
 
       // Load photo texture
       const loader=new THREE.TextureLoader();
-      const photoTex=loader.load('hero-photo.png');
+      const photoTex=loader.load(window.__HERO_PHOTO||'hero-photo.png',()=>{
+        this._canvas.classList.add('is-ready');
+      });
 
       const geo=new THREE.PlaneGeometry(2.2,2.2);
       const mat=new THREE.ShaderMaterial({
