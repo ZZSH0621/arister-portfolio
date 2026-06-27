@@ -9,3 +9,14 @@ Thumbs.db
 .netlify
 # Local media assets
 thrill模仿视频/
+
+# Editor config
+.obsidian/
+
+# Dev docs and screenshots
+*.md
+!README.md
+屏幕截图*.png
+
+# Local cover assets (already tracked in assets/images/subdomains/)
+拓展项目封面图/
