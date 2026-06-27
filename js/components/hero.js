@@ -20,6 +20,12 @@
 
       this._pull=pull;
       this._video=video;
+      video.muted=true;
+      video.defaultMuted=true;
+      video.setAttribute('muted','');
+      video.setAttribute('playsinline','');
+      video.setAttribute('webkit-playsinline','');
+      video.load();
       const threshold=68;
       const maxPull=96;
       let startY=0;
@@ -42,14 +48,15 @@
           return;
         }
 
-        video.muted=false;
-        video.currentTime=0;
+        video.muted=true;
+        video.defaultMuted=true;
+        video.setAttribute('muted','');
+        video.setAttribute('playsinline','');
+        video.setAttribute('webkit-playsinline','');
+        try{video.currentTime=0;}catch(_){}
         const playback=video.play();
         if(playback&&typeof playback.catch==='function'){
-          playback.catch(()=>{
-            video.muted=true;
-            video.play().catch(()=>{});
-          });
+          playback.catch(()=>{});
         }
       };
       const finish=(pointerId)=>{

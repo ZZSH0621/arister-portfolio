@@ -70,7 +70,7 @@
   <!-- Hero -->
   <section id="hero" data-theme-color="#ff5e2c">
     <div class="hero__video-stage" id="heroVideoStage" aria-hidden="true">
-      <video id="heroVideo" class="hero__video" preload="none" playsinline>
+      <video id="heroVideo" class="hero__video" preload="metadata" muted playsinline webkit-playsinline>
         <source src="72s修复版.mp4" type="video/mp4">
       </video>
     </div>
@@ -115,15 +115,15 @@
         </div>
         <div class="about__content">
           <div class="about__bio" data-reveal>
-            <p data-i18n="about.bio1">我是一名专注于创意开发和交互设计的全栈开发者，致力于在技术与美学之间找到平衡。</p>
-            <p data-i18n="about.bio2">拥有多年的 Web 开发经验，擅长使用现代技术栈构建高性能、富有表现力的数字产品。</p>
-            <p data-i18n="about.bio3">目前作为自由职业者与全球各地的机构、公司和创业团队合作。</p>
+            <p data-i18n="about.bio1">我是一名专注于大模型数据建设与评测的AI训练师，致力于在数据质量与模型能力之间搭建可靠的桥梁。</p>
+            <p data-i18n="about.bio2">拥有从需求分析、规则文档编写、任务下发到数据标注、质检、验收及交付的全流程实操经验。在训练数据建设方面，擅长SFT数据构建、偏好数据构建、CoT推理数据及多轮对话数据处理，曾带领团队完成多个AI情感对话与语音合成项目的数据交付。</p>
+            <p data-i18n="about.bio3">在模型评测领域，参与过单模型能力下钻、双模型对比及多模型横向评测，能够独立完成评测指标体系设计、评测集构建、BadCase归因分析及评测报告输出，并将评测数据转化为可视化图表与场景化选型建议。熟练运用SFT、DPO、RAG、ReAct和Agent等大模型技术原理，并擅长借助Trae IDE、Claude Code、DeepSeek等AI工具搭建自动化工作流，持续提升数据处理与评测效率。具备中英韩三语能力，能够胜任跨语言的数据建设与评测任务。</p>
           </div>
 
           <div class="about__accordion" data-reveal>
             <div class="accordion__item">
               <button class="accordion__trigger" aria-expanded="false">
-                <span data-i18n="about.experience">工作经历</span>
+                <span data-i18n="about.experience">项目经历</span>
                 <span class="accordion__icon"></span>
               </button>
               <div class="accordion__content">
@@ -131,25 +131,25 @@
                   <div class="timeline__item">
                     <div class="timeline__dot"></div>
                     <div class="timeline__info">
-                      <h4 data-i18n="about.exp1.title">高级前端开发工程师</h4>
-                      <p class="timeline__meta"><span data-i18n="about.exp1.company">某科技公司</span> · <span data-i18n="about.exp1.period">2022 - 至今</span></p>
-                      <p data-i18n="about.exp1.desc">负责核心产品的前端架构设计与开发。</p>
+                      <h4 data-i18n="about.exp1.title">AI情感对话SFT数据建设项目</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp1.company">AI训练师 / 项目组长</span></p>
+                      <p data-i18n="about.exp1.desc">参与AI情感对话训练数据建设，带领5人标注团队完成多轮对话SFT数据改写、复核及交付。根据情感交互场景制定并落实标注规范和评分标准，开展试标校准、案例讨论及疑难问题仲裁。通过多人一致性审核、偏好数据构建及人工优选等方式控制数据质量，降低标注分歧和低质量数据占比。围绕情感理解、多轮对话、问题解决和逻辑推理等维度优化数据内容，支持模型对话能力提升。负责团队任务分配、进度跟踪和质量抽检，保障项目按计划稳定交付。</p>
                     </div>
                   </div>
                   <div class="timeline__item">
                     <div class="timeline__dot"></div>
                     <div class="timeline__info">
-                      <h4 data-i18n="about.exp2.title">创意开发工程师</h4>
-                      <p class="timeline__meta"><span data-i18n="about.exp2.company">某设计工作室</span> · <span data-i18n="about.exp2.period">2020 - 2022</span></p>
-                      <p data-i18n="about.exp2.desc">为品牌客户打造创意互动网站。</p>
+                      <h4 data-i18n="about.exp2.title">AI语音助手TTS音色合成项目</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp2.company">AI训练师</span></p>
+                      <p data-i18n="about.exp2.desc">参与AI语音助手TTS音色合成数据建设，负责文本与音频数据的标注、复核及质量检查。根据语义和语音表现完成停顿切分、语气识别及情绪标签标注，提升数据在韵律和情感维度上的准确性。检查文本与音频的一致性，识别错读、漏读、异常停顿及情绪不匹配等问题，并完成问题数据修正。依据标注规范开展试标和标准校准，保障不同标注人员之间的数据一致性与交付质量。</p>
                     </div>
                   </div>
                   <div class="timeline__item">
                     <div class="timeline__dot"></div>
                     <div class="timeline__info">
-                      <h4 data-i18n="about.exp3.title">自由职业开发者</h4>
-                      <p class="timeline__meta"><span data-i18n="about.exp3.company">自由职业</span> · <span data-i18n="about.exp3.period">2018 - 2020</span></p>
-                      <p data-i18n="about.exp3.desc">与多家机构合作提供技术服务。</p>
+                      <h4 data-i18n="about.exp3.title">音视频生成模型横向评测项目</h4>
+                      <p class="timeline__meta"><span data-i18n="about.exp3.company">AI训练师 / 评测统筹</span></p>
+                      <p data-i18n="about.exp3.desc">参与音视频生成模型横向评测的全流程设计与执行，覆盖4个主流模型（可灵、即梦、Vidu、Veo），横跨6大业务场景，共计24条Prompt、96条生成视频。主导评测指标体系设计，将主观体验拆解为5个一级维度、10个二级指标，并为不同场景配置差异化权重矩阵。组织8人标注团队完成试标校准与正式标注，设计分歧仲裁和交叉质检机制，保障评分一致性。完成评测结果的多维分析，结合GoodCase/BadCase归因输出场景化选型建议。参与编写评测规则文档和全流程评测报告，沉淀出可复用的模型评测方法论。</p>
                     </div>
                   </div>
                 </div>
@@ -163,22 +163,34 @@
               </button>
               <div class="accordion__content">
                 <div class="skills__group">
-                  <h5 data-i18n="about.skill.frontend">前端开发</h5>
+                  <h5 data-i18n="about.skill.frontend">大模型技术</h5>
                   <div class="skills__tags">
-                    <span class="skill-tag">HTML/CSS</span><span class="skill-tag">JavaScript</span><span class="skill-tag">TypeScript</span><span class="skill-tag">React</span><span class="skill-tag">Vue</span><span class="skill-tag">WebGL/Three.js</span><span class="skill-tag">GSAP</span>
+                    <span class="skill-tag">SFT</span><span class="skill-tag">DPO</span><span class="skill-tag">RAG</span><span class="skill-tag">ReAct</span><span class="skill-tag">Agent</span>
                   </div>
                 </div>
                 <div class="skills__group">
-                  <h5 data-i18n="about.skill.backend">后端开发</h5>
+                  <h5 data-i18n="about.skill.backend">开发工具</h5>
                   <div class="skills__tags">
-                    <span class="skill-tag">Node.js</span><span class="skill-tag">Python</span><span class="skill-tag">PostgreSQL</span><span class="skill-tag">Redis</span><span class="skill-tag">GraphQL</span>
+                    <span class="skill-tag">Trae IDE/Work</span><span class="skill-tag">Claude Code</span><span class="skill-tag">Codex</span><span class="skill-tag">DeepSeek</span><span class="skill-tag">ChatGPT</span><span class="skill-tag">Visual Studio Code</span><span class="skill-tag">Libtv</span><span class="skill-tag">MiniMaxHub</span><span class="skill-tag">Obsidian</span>
                   </div>
                 </div>
                 <div class="skills__group">
-                  <h5 data-i18n="about.skill.design">设计工具</h5>
+                  <h5 data-i18n="about.skill.design">语言能力</h5>
                   <div class="skills__tags">
-                    <span class="skill-tag">Figma</span><span class="skill-tag">Blender</span><span class="skill-tag">After Effects</span>
+                    <span class="skill-tag">英语 CET-4</span><span class="skill-tag">韩语 三级</span>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion__item">
+              <button class="accordion__trigger" aria-expanded="false">
+                <span data-i18n="about.quality">综合素质</span>
+                <span class="accordion__icon"></span>
+              </button>
+              <div class="accordion__content">
+                <div class="about__quality">
+                  <p data-i18n="about.quality.desc">责任心强，具备稳定的任务交付和团队协作能力。面对复杂或表述模糊的标注规则，能够通过试标、案例讨论和标准校准统一团队认知；严格执行抽检、复核与问题仲裁流程，保障数据一致性和交付质量。</p>
                 </div>
               </div>
             </div>
@@ -193,8 +205,15 @@
                   <div class="timeline__item">
                     <div class="timeline__dot"></div>
                     <div class="timeline__info">
-                      <h4 data-i18n="about.edu.title">计算机科学 学士</h4>
-                      <p class="timeline__meta"><span data-i18n="about.edu.school">某大学</span> · <span data-i18n="about.edu.period">2014 - 2018</span></p>
+                      <h4 data-i18n="about.edu.title">上海电机学院</h4>
+                      <p class="timeline__meta"><span data-i18n="about.edu.school">机电一体化</span> · <span data-i18n="about.edu.period">2021 - 2024</span></p>
+                    </div>
+                  </div>
+                  <div class="timeline__item">
+                    <div class="timeline__dot"></div>
+                    <div class="timeline__info">
+                      <h4 data-i18n="about.edu2.title">韩国庆南大学</h4>
+                      <p class="timeline__meta"><span data-i18n="about.edu2.school">机械工程</span> · <span data-i18n="about.edu2.period">2024 - 2025</span></p>
                     </div>
                   </div>
                 </div>
