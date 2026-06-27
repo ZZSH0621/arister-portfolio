@@ -16,6 +16,7 @@
       const pull=document.getElementById('heroPull');
       const video=document.getElementById('heroVideo');
       const stage=document.getElementById('heroVideoStage');
+      const soundToggle=document.getElementById('heroSoundToggle');
       if(!hero||!pull||!video||!stage)return;
 
       this._pull=pull;
@@ -32,6 +33,15 @@
       let distance=0;
       let dragging=false;
 
+      const syncSoundToggle=()=>{
+        if(!soundToggle)return;
+        const isOn=!video.muted;
+        soundToggle.classList.toggle('is-on',isOn);
+        soundToggle.setAttribute('aria-pressed',String(isOn));
+        soundToggle.setAttribute('aria-label',isOn?'关闭视频声音':'开启视频声音');
+        soundToggle.textContent=isOn?'关闭声音':'开启声音';
+      };
+
       const setDistance=(value)=>{
         distance=Math.max(0,Math.min(maxPull,value));
         pull.style.setProperty('--pull-distance',distance+'px');
@@ -44,6 +54,9 @@
 
         if(!showVideo){
           video.pause();
+          video.muted=true;
+          video.defaultMuted=true;
+          syncSoundToggle();
           video.currentTime=0;
           return;
         }
@@ -58,6 +71,7 @@
         if(playback&&typeof playback.catch==='function'){
           playback.catch(()=>{});
         }
+        syncSoundToggle();
       };
       const finish=(pointerId)=>{
         if(!dragging)return;
@@ -84,6 +98,25 @@
       pull.addEventListener('keydown',(event)=>{
         if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleLayer();}
       });
+      if(soundToggle){
+        soundToggle.addEventListener('click',()=>{
+          const shouldUnmute=video.muted;
+          video.muted=!shouldUnmute;
+          video.defaultMuted=!shouldUnmute;
+          syncSoundToggle();
+          if(shouldUnmute){
+            const playback=video.play();
+            if(playback&&typeof playback.catch==='function'){
+              playback.catch(()=>{
+                video.muted=true;
+                video.defaultMuted=true;
+                syncSoundToggle();
+              });
+            }
+          }
+        });
+        syncSoundToggle();
+      }
 
       const visibilityObserver=new IntersectionObserver((entries)=>{
         const isVisible=entries[0]&&entries[0].isIntersecting;
@@ -91,6 +124,9 @@
         if(!isVisible){
           dragging=false;
           pull.classList.remove('is-dragging');
+          video.muted=true;
+          video.defaultMuted=true;
+          syncSoundToggle();
           setDistance(0);
         }
       },{threshold:0});
