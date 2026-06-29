@@ -72,8 +72,8 @@ window.__I18N={
     "subdomains.photo.title":"Fine-Art-Photography",
     "subdomains.photo.desc":"美术风格图片素材与 caption 分析展示页。",
     "subdomains.mental.label":"心理健康",
-    "subdomains.mental.title":"Adolescent Mental Health",
-    "subdomains.mental.desc":"青春期心理健康互动副本，一束微光式的情绪陪伴体验。",
+    "subdomains.mental.title":"A-glimmer-of-Light",
+    "subdomains.mental.desc":"引导青少年直视内心，面对世界！",
 
     "blog.label":"博客",
     "blog.heading":"思考<span>与</span>分享",
@@ -170,8 +170,8 @@ window.__I18N={
     "subdomains.photo.title":"Fine-Art-Photography",
     "subdomains.photo.desc":"A gallery for fine-art photography assets and caption analysis.",
     "subdomains.mental.label":"Mental Health",
-    "subdomains.mental.title":"Adolescent Mental Health",
-    "subdomains.mental.desc":"An interactive adolescent mental-health experience shaped around a glimmer of light.",
+    "subdomains.mental.title":"A-glimmer-of-Light",
+    "subdomains.mental.desc":"Guiding adolescents to face their inner world, and then the world outside.",
 
     "blog.label":"Blog",
     "blog.heading":"Thoughts<span> & </span>insights",
