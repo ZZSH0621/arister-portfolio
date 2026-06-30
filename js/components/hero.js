@@ -31,6 +31,17 @@
           video.setAttribute('muted','');
         }
       };
+      const playWithSound=()=>{
+        setVideoAudible(true);
+        syncSoundToggle();
+        const playback=video.play();
+        if(playback&&typeof playback.catch==='function'){
+          playback.catch(()=>{
+            setVideoAudible(true);
+            syncSoundToggle();
+          });
+        }
+      };
       setVideoAudible(true);
       video.setAttribute('playsinline','');
       video.setAttribute('webkit-playsinline','');
@@ -78,15 +89,7 @@
         video.setAttribute('playsinline','');
         video.setAttribute('webkit-playsinline','');
         try{video.currentTime=0;}catch(_){}
-        const playback=video.play();
-        if(playback&&typeof playback.catch==='function'){
-          playback.catch(()=>{
-            setVideoAudible(false);
-            syncSoundToggle();
-            video.play().catch(()=>{});
-          });
-        }
-        syncSoundToggle();
+        playWithSound();
       };
       const finish=(pointerId)=>{
         if(!dragging)return;
@@ -99,6 +102,8 @@
 
       pull.addEventListener('pointerdown',(event)=>{
         if(event.button!==0&&event.pointerType==='mouse')return;
+        setVideoAudible(true);
+        syncSoundToggle();
         dragging=true;
         startY=event.clientY;
         pull.classList.add('is-dragging');
@@ -119,13 +124,7 @@
           setVideoAudible(shouldUnmute);
           syncSoundToggle();
           if(shouldUnmute){
-            const playback=video.play();
-            if(playback&&typeof playback.catch==='function'){
-              playback.catch(()=>{
-                setVideoAudible(false);
-                syncSoundToggle();
-              });
-            }
+            playWithSound();
           }
         });
         syncSoundToggle();
