@@ -21,9 +21,17 @@
 
       this._pull=pull;
       this._video=video;
-      video.muted=true;
-      video.defaultMuted=true;
-      video.setAttribute('muted','');
+      const setVideoAudible=(audible)=>{
+        video.muted=!audible;
+        video.defaultMuted=!audible;
+        if(audible){
+          video.removeAttribute('muted');
+          video.volume=1;
+        }else{
+          video.setAttribute('muted','');
+        }
+      };
+      setVideoAudible(true);
       video.setAttribute('playsinline','');
       video.setAttribute('webkit-playsinline','');
       video.load();
@@ -54,22 +62,23 @@
 
         if(!showVideo){
           video.pause();
-          video.muted=true;
-          video.defaultMuted=true;
+          setVideoAudible(true);
           syncSoundToggle();
           video.currentTime=0;
           return;
         }
 
-        video.muted=true;
-        video.defaultMuted=true;
-        video.setAttribute('muted','');
+        setVideoAudible(true);
         video.setAttribute('playsinline','');
         video.setAttribute('webkit-playsinline','');
         try{video.currentTime=0;}catch(_){}
         const playback=video.play();
         if(playback&&typeof playback.catch==='function'){
-          playback.catch(()=>{});
+          playback.catch(()=>{
+            setVideoAudible(false);
+            syncSoundToggle();
+            video.play().catch(()=>{});
+          });
         }
         syncSoundToggle();
       };
@@ -101,15 +110,13 @@
       if(soundToggle){
         soundToggle.addEventListener('click',()=>{
           const shouldUnmute=video.muted;
-          video.muted=!shouldUnmute;
-          video.defaultMuted=!shouldUnmute;
+          setVideoAudible(shouldUnmute);
           syncSoundToggle();
           if(shouldUnmute){
             const playback=video.play();
             if(playback&&typeof playback.catch==='function'){
               playback.catch(()=>{
-                video.muted=true;
-                video.defaultMuted=true;
+                setVideoAudible(false);
                 syncSoundToggle();
               });
             }
@@ -124,8 +131,7 @@
         if(!isVisible){
           dragging=false;
           pull.classList.remove('is-dragging');
-          video.muted=true;
-          video.defaultMuted=true;
+          setVideoAudible(true);
           syncSoundToggle();
           setDistance(0);
         }
