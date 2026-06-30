@@ -35,6 +35,12 @@
       video.setAttribute('playsinline','');
       video.setAttribute('webkit-playsinline','');
       video.load();
+      window.setTimeout(()=>{
+        if(!hero.classList.contains('is-video-active')){
+          video.preload='auto';
+          video.load();
+        }
+      },4000);
       const threshold=68;
       const maxPull=96;
       let startY=0;
